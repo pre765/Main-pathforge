@@ -4,6 +4,7 @@ const SESSION_KEY = 'auth_portal_session';
 const TOKEN_KEY = 'auth_portal_token';
 const PATHS_STORAGE_KEY = 'auth_portal_selected_paths';
 const API_BASE = (window.PATHFORGE_API_BASE || 'http://localhost:5000/api').replace(/\/$/, '');
+const GOOGLE_CLIENT_ID = (window.PATHFORGE_GOOGLE_CLIENT_ID || '').trim();
 
 const DOMAIN_MAP = {
     'AIML': 'AI/ML',
@@ -126,9 +127,19 @@ async function fetchMyProfile() {
 
 async function signUp(name, email, password) {
     try {
-        const payload = await apiRequest('/auth/register', {
+        await apiRequest('/auth/register/request-otp', {
             method: 'POST',
             body: { name: name.trim(), email: email.trim(), password },
+        });
+
+        const otp = prompt('Enter the 6-digit verification code sent to your email:');
+        if (!otp) {
+            return { success: false, message: 'Sign up cancelled. Verification code is required.' };
+        }
+
+        const payload = await apiRequest('/auth/register/verify-otp', {
+            method: 'POST',
+            body: { email: email.trim(), otp: otp.trim() },
         });
 
         setAuthToken(payload.token);
@@ -155,6 +166,97 @@ async function logIn(email, password) {
         return { success: true };
     } catch (error) {
         return { success: false, message: error.message || 'Login failed' };
+    }
+}
+
+async function continueWithGoogle(idToken) {
+    try {
+        const payload = await apiRequest('/auth/google', {
+            method: 'POST',
+            body: { idToken },
+        });
+
+        setAuthToken(payload.token);
+        const profile = await fetchMyProfile();
+        setSessionFromUser(profile);
+
+        return { success: true };
+    } catch (error) {
+        return { success: false, message: error.message || 'Google sign-in failed' };
+    }
+}
+
+async function onGoogleCredentialResponse(response) {
+    const credential = response && response.credential;
+    if (!credential) {
+        alert('Google sign-in failed. Missing credential token.');
+        return;
+    }
+
+    const result = await continueWithGoogle(credential);
+    if (result.success) {
+        window.location.href = 'profile.html';
+        return;
+    }
+
+    alert(result.message || 'Google sign-in failed. Please try again.');
+}
+
+function renderGoogleButton(mode = 'signin') {
+    const container = document.getElementById('google-signin-button');
+    if (!container || !window.google || !window.google.accounts || !window.google.accounts.id) {
+        return;
+    }
+
+    container.innerHTML = '';
+    window.google.accounts.id.renderButton(container, {
+        theme: 'filled_black',
+        size: 'large',
+        shape: 'pill',
+        width: 320,
+        text: mode === 'signup' ? 'signup_with' : 'signin_with',
+    });
+}
+
+function initGoogleAuth(mode = 'signin') {
+    if (!GOOGLE_CLIENT_ID) {
+        const note = document.getElementById('google-auth-note');
+        if (note) {
+            note.textContent = 'Google sign-in is disabled. Set PATHFORGE_GOOGLE_CLIENT_ID in the page script.';
+        }
+        return;
+    }
+
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        return;
+    }
+
+    window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: onGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+    });
+
+    renderGoogleButton(mode);
+}
+
+function initializeGoogleAuthOnLoad(mode = 'signin', attempts = 0) {
+    const tryInit = () => {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+            initGoogleAuth(mode);
+            return;
+        }
+
+        if (attempts < 30) {
+            setTimeout(() => initializeGoogleAuthOnLoad(mode, attempts + 1), 150);
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryInit, { once: true });
+    } else {
+        tryInit();
     }
 }
 
@@ -277,20 +379,5 @@ function getDefaultProgress(seed = 0) {
         monthlyProgress: [35, 50, 45, 68, 60, 82, 78, 90].map((v, i) => v + Math.floor(r(seed + i) * 15)),
     };
 }
-fetch("http://localhost:5000/login", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    email: email,
-    password: password
-  })
-})
-.then(res => res.json())
-.then(data => {
-  console.log(data);
-})
-.catch(err => {
-  console.log("Error:", err);
-});
+
+window.initializeGoogleAuthOnLoad = initializeGoogleAuthOnLoad;

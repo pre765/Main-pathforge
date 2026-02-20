@@ -39,6 +39,9 @@
                     </svg>
                 </button>
             </form>
+            <div class="oauth-divider"><span>or</span></div>
+            <div id="google-signin-button" class="google-signin-button"></div>
+            <p id="google-auth-note" class="oauth-note"></p>
          
             <p class="form-footer">
                 Don't have an account? <a href="index.html">Sign Up</a><br>
@@ -49,10 +52,16 @@
 
     <audio id="bubblePop" src="sounds/bubble-pop.mp3" preload="auto"></audio>
 
+    <script>
+        window.PATHFORGE_GOOGLE_CLIENT_ID = '635127589590-p5edf2oj0isoh6dplu39kd1oghh1cd31.apps.googleusercontent.com';
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
     <script src="js/three-scene.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        initializeGoogleAuthOnLoad('signin');
+
         document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
