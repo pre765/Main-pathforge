@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Prep | Resume Builder & ATS Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/interview-prep.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="profile-page interview-prep-page">
+    <div id="canvas-3d"></div>
+    <div class="profile-header-bar">
+        <h1>Interview Prep</h1>
+        <div class="header-actions">
+            <a href="profile.html" class="choose-path-btn">← Dashboard</a>
+        </div>
+    </div>
+
+    <main class="interview-prep-main">
+        <aside class="interview-prep-sidebar">
+            <nav class="prep-nav">
+                <button class="prep-nav-item active" data-section="build-resume">Build Resume</button>
+                <button class="prep-nav-item" data-section="check-resume">Check Resume</button>
+                <button class="prep-nav-item" data-section="mock-interview">Mock Interview</button>
+            </nav>
+        </aside>
+
+        <div class="interview-prep-content">
+            <!-- Build Resume Section -->
+            <section class="prep-section active" id="section-build-resume">
+                <div class="resume-builder-container">
+                    <div class="resume-chat-container">
+                        <h2>Resume Builder</h2>
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-message bot">
+                                <div class="message-content">
+                                    <p>Welcome! I'll help you build a professional resume. Let's start by gathering some information.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-form-container" id="chat-form-container">
+                            <form class="resume-chat-form" id="resume-chat-form">
+                                <div class="form-step active" id="step-skills">
+                                    <h3>What are your skills?</h3>
+                                    <textarea id="input-skills" placeholder="e.g., JavaScript, React, Node.js, Python, Machine Learning..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('skills')">Next</button>
+                                </div>
+                                <div class="form-step" id="step-projects">
+                                    <h3>Tell me about your projects</h3>
+                                    <textarea id="input-projects" placeholder="Describe your projects, technologies used, and achievements..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('projects')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('projects')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-experience">
+                                    <h3>What's your experience level?</h3>
+                                    <textarea id="input-experience" placeholder="Describe your experience level (e.g., 2 years in web development, internship experience, etc.)..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('experience')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('experience')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-job-desc">
+                                    <h3>Paste the job description</h3>
+                                    <textarea id="input-job-desc" placeholder="Paste the full job description here..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('job-desc')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('job-desc')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-past-jobs">
+                                    <h3>Previous job experience (Optional)</h3>
+                                    <textarea id="input-past-jobs" placeholder="List your previous work experience, if any..."></textarea>
+                                    <button type="button" class="btn-submit" onclick="generateResume()">Generate Resume</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('past-jobs')">Back</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="resume-preview-container">
+                        <h2>Resume Preview</h2>
+                        <div class="resume-preview" id="resume-preview">
+                            <div class="resume-placeholder">
+                                <p>Complete the form to see your resume preview</p>
+                            </div>
+                        </div>
+                        <div class="resume-suggestions" id="resume-suggestions" style="display: none;">
+                            <h3>Suggestions</h3>
+                            <div class="suggestions-content" id="suggestions-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Check Resume Section -->
+            <section class="prep-section" id="section-check-resume">
+                <div class="resume-checker-container">
+                    <h2>Resume ATS Checker</h2>
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="resume-file-input" accept=".pdf,.doc,.docx" style="display: none;">
+                        <div class="upload-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p>Upload your resume (PDF, DOC, DOCX)</p>
+                            <button class="btn-upload" onclick="document.getElementById('resume-file-input').click()">Choose File</button>
+                        </div>
+                    </div>
+                    <div class="ats-results" id="ats-results" style="display: none;">
+                        <div class="ats-score-display">
+                            <div class="score-circle">
+                                <span class="score-value" id="ats-score-value">0</span>
+                                <span class="score-label">ATS Score</span>
+                            </div>
+                        </div>
+                        <div class="ats-tabs">
+                            <button class="ats-tab active" data-tab="suggested-changes">Suggested Changes</button>
+                            <button class="ats-tab" data-tab="suggested-skills">Suggested Skills + Projects</button>
+                            <button class="ats-tab" data-tab="layouts">Optional Layouts</button>
+                        </div>
+                        <div class="ats-tab-content active" id="tab-suggested-changes">
+                            <div class="suggestions-list" id="suggested-changes-list"></div>
+                        </div>
+                        <div class="ats-tab-content" id="tab-suggested-skills">
+                            <div class="suggestions-list" id="suggested-skills-list"></div>
+                        </div>
+                        <div class="ats-tab-content" id="tab-layouts">
+                            <div class="layouts-grid" id="layouts-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mock Interview Section -->
+            <section class="prep-section" id="section-mock-interview">
+                <div class="mock-interview-container">
+                    <h2>Mock Interview</h2>
+                    <div class="mock-interview-placeholder">
+                        <p>Mock interview feature coming soon!</p>
+                        <p class="placeholder-desc">Practice your interview skills with AI-powered mock interviews.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/interview-prep.js"></script>
+</body>
+</html>

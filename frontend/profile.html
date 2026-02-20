@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="profile-page">
+    <div id="canvas-3d"></div>
+    <div class="profile-header-bar">
+        <h1>My Dashboard</h1>
+        <div class="header-actions">
+            <a href="posts.html" class="post-nav-btn">Post</a>
+            <div class="account-toggle-wrap">
+                <button type="button" class="account-toggle-btn" id="account-toggle-btn" aria-expanded="false" aria-haspopup="true">
+                    Account
+                    <svg class="account-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="account-dropdown" id="account-dropdown" hidden>
+                    <button type="button" class="account-menu-item account-menu-item-danger" id="menu-delete-account">Delete Account</button>
+                    <button type="button" class="account-menu-item account-menu-item-danger" id="menu-delete-profile">Delete Profile</button>
+                    <a href="login.html" class="account-menu-item" id="menu-signout">Sign Out</a>
+                    <a href="login.html" class="account-menu-item" id="menu-logout">Log Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="profile-tabs" role="tablist">
+        <button type="button" class="profile-tab active" role="tab" id="tab-dashboard" aria-selected="true">Dashboard</button>
+        <button type="button" class="profile-tab" role="tab" id="tab-posts" aria-selected="false">Posts</button>
+        <a href="roadmap.html" class="profile-tab profile-tab-link">Roadmap</a>
+        <a href="interview-prep.html" class="profile-tab profile-tab-link">Interview Prep</a>
+    </nav>
+
+    <div class="profile-grid tab-panel" id="panel-dashboard" role="tabpanel">
+        <aside class="profile-card">
+            <div class="profile-avatar" id="avatar">U</div>
+            <h2 id="profile-name">User</h2>
+            <p class="user-email" id="profile-email">user@example.com</p>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="value" id="stat-courses">0/0</div>
+                    <div class="label">Topics Completed</div>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span>Member since</span>
+                <span id="member-since">—</span>
+            </div>
+            <div class="detail-row">
+                <span>Level</span>
+                <span id="user-level">Beginner</span>
+            </div>
+            <div class="paths-section" id="paths-section" style="display: none;">
+                <div class="paths-label">Your Paths</div>
+                <div class="paths-list" id="paths-list"></div>
+                <a href="path-select.html" class="add-path-link">+ Add path</a>
+            </div>
+            <div class="topics-navigation" id="topics-navigation" style="display: none;">
+                <div class="paths-label">Jump to Topic Dashboard</div>
+                <div class="topics-list" id="topics-list"></div>
+            </div>
+        </aside>
+
+        <main class="charts-section">
+            <div class="chart-row">
+                <div class="chart-card">
+                    <h3>Skill Progress</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="pie-chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="activity-toggle-container">
+                        <button class="activity-toggle-btn active" id="toggle-weekly">Weekly Activity</button>
+                        <button class="activity-toggle-btn" id="toggle-monthly">Monthly Activity</button>
+                    </div>
+                    <div class="chart-wrapper" id="activity-chart-wrapper">
+                        <canvas id="activity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="tab-panel profile-tab-content" id="panel-posts" role="tabpanel" hidden>
+        <div class="posts-feed" id="posts-feed">
+            <!-- LinkedIn-style posts injected by profile.js -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/roadmaps-data.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

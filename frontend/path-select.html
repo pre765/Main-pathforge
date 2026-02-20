@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Path | Select Your Journey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/path-bubbles.css">
+</head>
+<body>
+    <div class="path-page">
+        <h1 class="path-title">Choose Your Path</h1>
+        <p class="path-subtitle">Click a bubble to begin your journey</p>
+
+        <div class="bubble-container" id="bubble-container">
+            <!-- Bubbles are injected by JS -->
+        </div>
+
+        <!-- Spawn point at bottom center -->
+        <div class="spawn-point" id="spawn-point"></div>
+
+        <!-- Droplet container for pop effect -->
+        <div class="droplets-container" id="droplets-container"></div>
+    </div>
+
+    <script src="js/path-bubbles.js"></script>
+    <audio id="bubblePop" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mp3">
+    </audio>
+    
+</body>
+</html>
