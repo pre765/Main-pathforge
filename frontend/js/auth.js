@@ -277,3 +277,20 @@ function getDefaultProgress(seed = 0) {
         monthlyProgress: [35, 50, 45, 68, 60, 82, 78, 90].map((v, i) => v + Math.floor(r(seed + i) * 15)),
     };
 }
+fetch("http://localhost:5000/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    email: email,
+    password: password
+  })
+})
+.then(res => res.json())
+.then(data => {
+  console.log(data);
+})
+.catch(err => {
+  console.log("Error:", err);
+});
