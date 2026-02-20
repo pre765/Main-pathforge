@@ -9,6 +9,10 @@ const PATHS = [
     'Product & Design',
 ];
 
+if (!getCurrentUser()) {
+    window.location.href = 'login.html';
+}
+
 const container = document.getElementById('bubble-container');
 const dropletsContainer = document.getElementById('droplets-container');
 let bubbles = [];
@@ -174,7 +178,7 @@ function resolveCollisions() {
     }
 }
 
-function popBubble(bubble, redirectUrl = 'profile.html') {
+async function popBubble(bubble, redirectUrl = 'profile.html') {
     if (bubble.el.classList.contains('popping')) return;
     bubble.el.classList.add('popping');
 
@@ -186,6 +190,7 @@ function popBubble(bubble, redirectUrl = 'profile.html') {
         const paths = JSON.parse(localStorage.getItem('auth_portal_selected_paths') || '[]');
         if (!paths.includes(bubble.pathText)) paths.push(bubble.pathText);
         localStorage.setItem('auth_portal_selected_paths', JSON.stringify(paths));
+        await syncSelectedPathsToBackend(paths);
     } catch (e) {}
 
     setTimeout(() => {

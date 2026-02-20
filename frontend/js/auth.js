@@ -1,6 +1,16 @@
-/* Simple auth using localStorage (demo only - no real backend) */
+/* Auth + session helpers wired to backend API with local progress persistence */
 const STORAGE_KEY = 'auth_portal_users';
 const SESSION_KEY = 'auth_portal_session';
+const TOKEN_KEY = 'auth_portal_token';
+const PATHS_STORAGE_KEY = 'auth_portal_selected_paths';
+const API_BASE = (window.PATHFORGE_API_BASE || 'http://localhost:5000/api').replace(/\/$/, '');
+
+const DOMAIN_MAP = {
+    'AIML': 'AI/ML',
+    'Cyber Security': 'Cybersecurity',
+    'Web Development': 'Web Development',
+    'Data Science': 'Data Science',
+};
 
 function getUsers() {
     try {
@@ -15,38 +25,142 @@ function saveUsers(users) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
 }
 
-function signUp(name, email, password) {
-    const users = getUsers();
-    const key = email.toLowerCase().trim();
-    if (users[key]) return false;
-
-    users[key] = {
-        name: name.trim(),
-        email: key,
-        password: password,
-        joinedAt: new Date().toISOString(),
-        progress: getDefaultProgress(),
-    };
-    saveUsers(users);
-
-    const session = { email: key, name: users[key].name };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    return true;
+function getAuthToken() {
+    return localStorage.getItem(TOKEN_KEY) || '';
 }
 
-function logIn(email, password) {
-    const users = getUsers();
-    const key = email.toLowerCase().trim();
-    const user = users[key];
-    if (!user || user.password !== password) return false;
+function setAuthToken(token) {
+    if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+    } else {
+        localStorage.removeItem(TOKEN_KEY);
+    }
+}
 
-    const session = { email: key, name: user.name };
+async function apiRequest(path, options = {}) {
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+    };
+
+    const token = getAuthToken();
+    if (token && !headers.Authorization) {
+        headers.Authorization = 'Bearer ' + token;
+    }
+
+    const response = await fetch(API_BASE + path, {
+        method: options.method || 'GET',
+        headers,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+
+    let payload = null;
+    try {
+        payload = await response.json();
+    } catch {
+        payload = null;
+    }
+
+    if (!response.ok || !payload || payload.success === false) {
+        const message = (payload && payload.message) || 'Request failed';
+        throw new Error(message);
+    }
+
+    return payload;
+}
+
+function upsertLocalUser(userData = {}) {
+    if (!userData.email) return null;
+
+    const users = getUsers();
+    const key = userData.email.toLowerCase().trim();
+    const existing = users[key] || {};
+
+    users[key] = {
+        ...existing,
+        ...userData,
+        email: key,
+        name: userData.name || existing.name || 'User',
+        selectedDomain: userData.selectedDomain || existing.selectedDomain || null,
+        skillLevel: userData.skillLevel || existing.skillLevel || 'beginner',
+        joinedAt: userData.joinedAt || existing.joinedAt || new Date().toISOString(),
+        progress: existing.progress || getDefaultProgress(),
+        progressPerPath: existing.progressPerPath || {},
+        completedSubtopics: existing.completedSubtopics || {},
+    };
+
+    saveUsers(users);
+    return users[key];
+}
+
+function setSessionFromUser(userData) {
+    const user = upsertLocalUser(userData);
+    if (!user) return null;
+
+    const session = {
+        email: user.email,
+        name: user.name,
+        role: user.role || 'student',
+        selectedDomain: user.selectedDomain || null,
+        skillLevel: user.skillLevel || 'beginner',
+    };
+
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    return true;
+    return session;
+}
+
+async function fetchMyProfile() {
+    const payload = await apiRequest('/student/me');
+    const data = payload.data || {};
+
+    return {
+        id: data._id || data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        selectedDomain: data.selectedDomain,
+        skillLevel: data.skillLevel,
+        joinedAt: data.createdAt || data.joinedAt,
+    };
+}
+
+async function signUp(name, email, password) {
+    try {
+        const payload = await apiRequest('/auth/register', {
+            method: 'POST',
+            body: { name: name.trim(), email: email.trim(), password },
+        });
+
+        setAuthToken(payload.token);
+        const profile = await fetchMyProfile();
+        setSessionFromUser(profile);
+
+        return { success: true };
+    } catch (error) {
+        return { success: false, message: error.message || 'Sign up failed' };
+    }
+}
+
+async function logIn(email, password) {
+    try {
+        const payload = await apiRequest('/auth/login', {
+            method: 'POST',
+            body: { email: email.trim(), password },
+        });
+
+        setAuthToken(payload.token);
+        const profile = await fetchMyProfile();
+        setSessionFromUser(profile);
+
+        return { success: true };
+    } catch (error) {
+        return { success: false, message: error.message || 'Login failed' };
+    }
 }
 
 function logOut() {
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(TOKEN_KEY);
 }
 
 function signOut() {
@@ -61,6 +175,7 @@ function deleteProfile() {
     if (users[key]) {
         users[key].progressPerPath = {};
         users[key].progress = getDefaultProgress();
+        users[key].completedSubtopics = {};
         saveUsers(users);
     }
 }
@@ -75,6 +190,7 @@ function deleteAccount() {
         saveUsers(users);
     }
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(PATHS_STORAGE_KEY);
 }
 
@@ -89,12 +205,20 @@ function getCurrentUser() {
 
 function getFullUser() {
     const session = getCurrentUser();
-    if (!session) return null;
-    const users = getUsers();
-    return users[session.email] || null;
-}
+    if (!session || !session.email) return null;
 
-const PATHS_STORAGE_KEY = 'auth_portal_selected_paths';
+    const users = getUsers();
+    const user = users[session.email];
+    if (user) return user;
+
+    return upsertLocalUser({
+        name: session.name,
+        email: session.email,
+        role: session.role,
+        selectedDomain: session.selectedDomain,
+        skillLevel: session.skillLevel,
+    });
+}
 
 function getSelectedPaths() {
     try {
@@ -108,6 +232,33 @@ function getSelectedPaths() {
     } catch {
         return [];
     }
+}
+
+async function syncSelectedPathsToBackend(paths) {
+    const normalized = Array.isArray(paths) ? paths : [];
+    const supported = normalized.map((path) => DOMAIN_MAP[path]).filter(Boolean);
+
+    if (!supported.length || !getAuthToken()) {
+        return { success: false, skipped: true };
+    }
+
+    const selectedDomain = supported[supported.length - 1];
+    const payload = await apiRequest('/student/domain', {
+        method: 'PUT',
+        body: { selectedDomain },
+    });
+
+    const user = payload.data || {};
+    setSessionFromUser({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        selectedDomain: user.selectedDomain,
+        skillLevel: user.skillLevel,
+        joinedAt: user.createdAt,
+    });
+
+    return { success: true, selectedDomain: user.selectedDomain };
 }
 
 function getDefaultProgress(seed = 0) {

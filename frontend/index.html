@@ -52,16 +52,17 @@
     <script src="js/three-scene.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        document.getElementById('signup-form').addEventListener('submit', function(e) {
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
 
-            if (signUp(name, email, password)) {
+            const result = await signUp(name, email, password);
+            if (result.success) {
                 window.location.href = 'path-select.html';
             } else {
-                alert('This email is already registered. Please log in instead.');
+                alert(result.message || 'Sign up failed. Please try again.');
             }
         });
     </script>
