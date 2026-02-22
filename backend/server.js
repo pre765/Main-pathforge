@@ -39,4 +39,8 @@ async function startServer() {
   }
 }
 
+const requestRoutes = require("./routes/requestRoutes");
+
+app.use("/api/request", requestRoutes);
+
 startServer();
