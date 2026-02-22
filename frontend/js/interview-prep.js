@@ -9,17 +9,25 @@
     const navItems = document.querySelectorAll('.prep-nav-item');
     const sections = document.querySelectorAll('.prep-section');
 
+    function showSection(sectionId) {
+        navItems.forEach(nav => nav.classList.remove('active'));
+        sections.forEach(sec => sec.classList.remove('active'));
+        const item = document.querySelector('.prep-nav-item[data-section="' + sectionId + '"]');
+        const panel = document.getElementById('section-' + sectionId);
+        if (item) item.classList.add('active');
+        if (panel) panel.classList.add('active');
+    }
+
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            const targetSection = item.dataset.section;
-            
-            navItems.forEach(nav => nav.classList.remove('active'));
-            sections.forEach(sec => sec.classList.remove('active'));
-            
-            item.classList.add('active');
-            document.getElementById('section-' + targetSection).classList.add('active');
+            showSection(item.dataset.section);
         });
     });
+
+    // Open Check Resume when landing with #check-resume
+    if (window.location.hash === '#check-resume') {
+        showSection('check-resume');
+    }
 
     // Resume Builder Form Steps
     let currentStep = 0;
@@ -169,109 +177,131 @@ ${data['past-jobs'] ? '\\subsection*{Previous Experience}\n' + data['past-jobs']
         return commonTech.filter(tech => lowerText.includes(tech));
     }
 
-    // Resume Checker
-    const fileInput = document.getElementById('resume-file-input');
-    const uploadArea = document.getElementById('upload-area');
-    const atsResults = document.getElementById('ats-results');
+    // ========== Resume Intelligence Engine ==========
+    const btnAnalyze = document.getElementById('btn-analyze');
+    const analyzeSpinner = document.getElementById('analyze-spinner');
+    const resultsContainer = document.getElementById('results-container');
+    const scoreBig = document.getElementById('score-big');
+    const readinessBadge = document.getElementById('readiness-badge');
+    const scoreExplanation = document.getElementById('score-explanation');
+    const scoreProgressFill = document.getElementById('score-progress-fill');
 
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Simulate file processing
-            uploadArea.innerHTML = `
-                <div style="text-align: center; color: var(--accent-green);">
-                    <p>✓ File uploaded: ${file.name}</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Processing resume...</p>
-                </div>
-            `;
-            
-            setTimeout(() => {
-                analyzeResume(file);
-            }, 1500);
+    if (btnAnalyze) {
+        btnAnalyze.addEventListener('click', function() {
+            const resumeText = document.getElementById('resume-text');
+            const jdText = document.getElementById('jd-text');
+            if (!resumeText || !jdText) return;
+
+            btnAnalyze.classList.add('loading');
+            btnAnalyze.setAttribute('aria-busy', 'true');
+
+            setTimeout(function() {
+                btnAnalyze.classList.remove('loading');
+                btnAnalyze.setAttribute('aria-busy', 'false');
+
+                const score = Math.floor(Math.random() * 25) + 70;
+                scoreBig.textContent = score + '%';
+                if (scoreProgressFill) scoreProgressFill.style.width = score + '%';
+
+                const levels = [
+                    { badge: 'Strong Candidate', text: 'You meet most required skills but lack some preferred tools.' },
+                    { badge: 'Good Fit', text: 'Your profile aligns well with the role; a few tweaks could strengthen your application.' },
+                    { badge: 'Needs Work', text: 'Several key skills or experience points are missing. Use the checklist and roadmap below.' }
+                ];
+                const level = score >= 75 ? levels[0] : score >= 55 ? levels[1] : levels[2];
+                readinessBadge.textContent = level.badge;
+                scoreExplanation.textContent = level.text;
+
+                resultsContainer.hidden = false;
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                populateInterviewQuestions();
+            }, 1800);
+        });
+    }
+
+    function populateInterviewQuestions() {
+        const technical = [
+            'Explain Docker architecture and when to use containers.',
+            'What is overfitting and how do you prevent it?',
+            'Describe the difference between REST and GraphQL.',
+            'How would you debug a memory leak in a Node.js application?',
+            'Explain CI/CD and how you have used it.',
+            'What is the time complexity of a hash map lookup?',
+            'Describe how you would design a rate-limiting system.'
+        ];
+        const behavioral = [
+            'Tell me about a time you had to meet a tight deadline.',
+            'Describe a situation where you had to work with a difficult stakeholder.',
+            'Give an example of when you took the lead on a project.',
+            'How do you handle receiving critical feedback?',
+            'Tell me about a time you failed and what you learned.',
+            'Describe how you prioritize tasks when everything is urgent.',
+            'Give an example of when you had to learn something new quickly.'
+        ];
+        const project = [
+            'Walk me through the most complex project you have worked on.',
+            'What would you do differently if you could rebuild a past project?',
+            'How did you measure success for your last project?',
+            'Describe a technical decision you made and its trade-offs.',
+            'How did you handle scope creep or changing requirements?',
+            'What tools and processes did you use for collaboration?',
+            'How did you ensure code quality and maintainability?'
+        ];
+
+        function fillList(id, items) {
+            const list = document.getElementById(id);
+            if (!list) return;
+            list.innerHTML = '';
+            items.forEach(function(q) {
+                const li = document.createElement('li');
+                li.textContent = q;
+                list.appendChild(li);
+            });
         }
+
+        fillList('iq-list-technical', technical);
+        fillList('iq-list-behavioral', behavioral);
+        fillList('iq-list-project', project);
+    }
+
+    // Interview question tabs
+    const iqTabs = document.querySelectorAll('.iq-tab');
+    const iqPanels = document.querySelectorAll('.iq-panel');
+
+    iqTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            const target = tab.dataset.iq;
+            iqTabs.forEach(function(t) { t.classList.remove('active'); });
+            iqPanels.forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            const panel = document.getElementById('iq-' + target);
+            if (panel) panel.classList.add('active');
+        });
     });
 
-    function analyzeResume(file) {
-        // Simulate ATS analysis
-        const atsScore = Math.floor(Math.random() * 30) + 70; // 70-100
-        
-        document.getElementById('ats-score-value').textContent = atsScore;
-        atsResults.style.display = 'block';
-        
-        // Populate tabs
-        populateSuggestedChanges();
-        populateSuggestedSkills();
-        populateLayouts();
-    }
+    // Copy summary button
+    const btnCopySummary = document.getElementById('btn-copy-summary');
+    const summaryText = document.getElementById('summary-text');
 
-    function populateSuggestedChanges() {
-        const list = document.getElementById('suggested-changes-list');
-        const suggestions = [
-            { title: 'Keyword Optimization', desc: 'Add more relevant keywords from the job description to improve ATS matching.' },
-            { title: 'Format Consistency', desc: 'Ensure consistent formatting throughout your resume. Use standard fonts and clear section headers.' },
-            { title: 'Quantify Achievements', desc: 'Add numbers and metrics to your achievements (e.g., "Increased performance by 30%").' },
-            { title: 'Remove Graphics', desc: 'ATS systems may not parse images or complex graphics. Stick to text-based formatting.' },
-        ];
-        
-        list.innerHTML = '';
-        suggestions.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'suggestion-card';
-            card.innerHTML = `<h4>${s.title}</h4><p>${s.desc}</p>`;
-            list.appendChild(card);
-        });
-    }
-
-    function populateSuggestedSkills() {
-        const list = document.getElementById('suggested-skills-list');
-        const suggestions = [
-            { title: 'Technical Skills', desc: 'Consider adding: Cloud Computing (AWS/Azure), Containerization (Docker), CI/CD pipelines, and version control expertise.' },
-            { title: 'Project Ideas', desc: 'Build a full-stack application, contribute to open-source projects, or create a portfolio website showcasing your work.' },
-        ];
-        
-        list.innerHTML = '';
-        suggestions.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'suggestion-card';
-            card.innerHTML = `<h4>${s.title}</h4><p>${s.desc}</p>`;
-            list.appendChild(card);
-        });
-    }
-
-    function populateLayouts() {
-        const grid = document.getElementById('layouts-grid');
-        const layouts = [
-            { name: 'Chronological', desc: 'Traditional format, best for steady career progression' },
-            { name: 'Functional', desc: 'Skills-focused, ideal for career changers' },
-            { name: 'Combination', desc: 'Hybrid approach, balances skills and experience' },
-            { name: 'Modern', desc: 'Creative design, suitable for design/creative roles' },
-        ];
-        
-        grid.innerHTML = '';
-        layouts.forEach(layout => {
-            const card = document.createElement('div');
-            card.className = 'layout-card';
-            card.innerHTML = `<h4>${layout.name}</h4><p>${layout.desc}</p>`;
-            card.addEventListener('click', () => {
-                alert(`Selected ${layout.name} layout. This would apply the layout in production.`);
+    if (btnCopySummary && summaryText) {
+        btnCopySummary.addEventListener('click', function() {
+            navigator.clipboard.writeText(summaryText.textContent).then(function() {
+                btnCopySummary.textContent = 'Copied!';
+                btnCopySummary.classList.add('copied');
+                setTimeout(function() {
+                    btnCopySummary.textContent = 'Copy';
+                    btnCopySummary.classList.remove('copied');
+                }, 2000);
             });
-            grid.appendChild(card);
         });
     }
 
-    // ATS Tabs
-    const atsTabs = document.querySelectorAll('.ats-tab');
-    const atsTabContents = document.querySelectorAll('.ats-tab-content');
-
-    atsTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetTab = tab.dataset.tab;
-            
-            atsTabs.forEach(t => t.classList.remove('active'));
-            atsTabContents.forEach(c => c.classList.remove('active'));
-            
-            tab.classList.add('active');
-            document.getElementById('tab-' + targetTab).classList.add('active');
+    // Checklist: strikethrough when checked (fallback for older browsers)
+    document.querySelectorAll('.checklist-item input').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var span = cb.nextElementSibling;
+            if (span) span.style.textDecoration = cb.checked ? 'line-through' : '';
         });
     });
 

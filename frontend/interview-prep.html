@@ -92,43 +92,154 @@
                 </div>
             </section>
 
-            <!-- Check Resume Section -->
+            <!-- Check Resume Section - Resume Intelligence Engine -->
             <section class="prep-section" id="section-check-resume">
-                <div class="resume-checker-container">
-                    <h2>Resume ATS Checker</h2>
-                    <div class="upload-area" id="upload-area">
-                        <input type="file" id="resume-file-input" accept=".pdf,.doc,.docx" style="display: none;">
-                        <div class="upload-placeholder">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <p>Upload your resume (PDF, DOC, DOCX)</p>
-                            <button class="btn-upload" onclick="document.getElementById('resume-file-input').click()">Choose File</button>
-                        </div>
-                    </div>
-                    <div class="ats-results" id="ats-results" style="display: none;">
-                        <div class="ats-score-display">
-                            <div class="score-circle">
-                                <span class="score-value" id="ats-score-value">0</span>
-                                <span class="score-label">ATS Score</span>
+                <div class="resume-intelligence-wrap">
+                    <!-- 1. HERO INPUT SECTION -->
+                    <section class="hero-input-section card-section">
+                        <h2 class="hero-title">Resume Intelligence Engine</h2>
+                        <p class="hero-subtitle">Analyze your job readiness instantly</p>
+                        <div class="input-row">
+                            <div class="input-group-hero">
+                                <label for="resume-text">Resume</label>
+                                <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
+                            </div>
+                            <div class="input-group-hero">
+                                <label for="jd-text">Job Description</label>
+                                <textarea id="jd-text" placeholder="Paste the job description here..."></textarea>
                             </div>
                         </div>
-                        <div class="ats-tabs">
-                            <button class="ats-tab active" data-tab="suggested-changes">Suggested Changes</button>
-                            <button class="ats-tab" data-tab="suggested-skills">Suggested Skills + Projects</button>
-                            <button class="ats-tab" data-tab="layouts">Optional Layouts</button>
+                        <div class="analyze-wrap">
+                            <button type="button" class="btn-analyze" id="btn-analyze">
+                                <span class="btn-text">Analyze</span>
+                                <span class="btn-spinner" id="analyze-spinner" aria-hidden="true"></span>
+                            </button>
                         </div>
-                        <div class="ats-tab-content active" id="tab-suggested-changes">
-                            <div class="suggestions-list" id="suggested-changes-list"></div>
-                        </div>
-                        <div class="ats-tab-content" id="tab-suggested-skills">
-                            <div class="suggestions-list" id="suggested-skills-list"></div>
-                        </div>
-                        <div class="ats-tab-content" id="tab-layouts">
-                            <div class="layouts-grid" id="layouts-grid"></div>
-                        </div>
+                    </section>
+
+                    <!-- Results container (shown after analysis) -->
+                    <div class="results-container" id="results-container" hidden>
+                        <!-- 2. SCORE OVERVIEW CARD -->
+                        <section class="score-overview-card card-section">
+                            <div class="score-big" id="score-big">78%</div>
+                            <div class="readiness-badge" id="readiness-badge">Strong Candidate</div>
+                            <p class="score-explanation" id="score-explanation">You meet most required skills but lack some preferred tools.</p>
+                            <div class="score-progress-wrap" aria-hidden="true">
+                                <div class="score-progress-bar"><div class="score-progress-fill" id="score-progress-fill"></div></div>
+                            </div>
+                        </section>
+
+                        <!-- 3. ANALYSIS BREAKDOWN (4 cards) -->
+                        <section class="analysis-breakdown card-section">
+                            <h3 class="section-heading">Analysis Breakdown</h3>
+                            <div class="breakdown-grid" id="breakdown-grid">
+                                <div class="breakdown-card" data-card="skills">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Skills Match</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Missing Docker</li>
+                                        <li>Missing AWS</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example fix</summary>
+                                        <p>"Containerized ML model using Docker; deployed on AWS ECS."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="experience">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Experience Strength</span>
+                                        <span class="status-badge status-good">Good</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Years of experience clearly stated</li>
+                                        <li>Consider adding company names</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>"Senior Developer at TechCorp (2020–present). Led team of 4."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="impact">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Impact &amp; Metrics</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Add quantified metrics (%, time, scale)</li>
+                                        <li>Use action verbs (Led, Reduced, Increased)</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>"Reduced API latency by 40%; improved test coverage to 90%."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="branding">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Professional Branding</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Add LinkedIn profile link</li>
+                                        <li>Ensure consistent formatting</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>Add a one-line professional headline and LinkedIn URL in the header.</p>
+                                    </details>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 4. IMMEDIATE ACTION CHECKLIST -->
+                        <section class="action-checklist card-section">
+                            <h3 class="section-heading">Immediate Fix Checklist</h3>
+                            <div class="checklist-box" id="action-checklist">
+                                <label class="checklist-item"><input type="checkbox"> <span>Add Docker project</span></label>
+                                <label class="checklist-item"><input type="checkbox"> <span>Add quantified metrics</span></label>
+                                <label class="checklist-item"><input type="checkbox"> <span>Add LinkedIn profile link</span></label>
+                            </div>
+                        </section>
+
+                        <!-- 5. ROADMAP RECOMMENDATIONS -->
+                        <section class="roadmap-recommendations card-section">
+                            <h3 class="section-heading">Recommended Learning Path</h3>
+                            <div class="roadmap-modules" id="roadmap-modules">
+                                <a href="roadmap.html" class="module-card">DevOps → Docker Fundamentals</a>
+                                <a href="roadmap.html" class="module-card">Cloud → AWS Basics</a>
+                            </div>
+                        </section>
+
+                        <!-- 6. INTERVIEW QUESTIONS -->
+                        <section class="interview-questions-section card-section">
+                            <h3 class="section-heading">Interview Questions</h3>
+                            <div class="iq-tabs">
+                                <button type="button" class="iq-tab active" data-iq="technical">Technical</button>
+                                <button type="button" class="iq-tab" data-iq="behavioral">Behavioral</button>
+                                <button type="button" class="iq-tab" data-iq="project">Project-based</button>
+                            </div>
+                            <div class="iq-panels">
+                                <div class="iq-panel active" id="iq-technical">
+                                    <ul class="iq-list" id="iq-list-technical"></ul>
+                                </div>
+                                <div class="iq-panel" id="iq-behavioral">
+                                    <ul class="iq-list" id="iq-list-behavioral"></ul>
+                                </div>
+                                <div class="iq-panel" id="iq-project">
+                                    <ul class="iq-list" id="iq-list-project"></ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 7. PROFESSIONAL SUMMARY SUGGESTION -->
+                        <section class="summary-suggestion card-section">
+                            <h3 class="section-heading">Suggested Professional Summary</h3>
+                            <div class="summary-box">
+                                <p class="summary-text" id="summary-text">Machine Learning Engineer with 3 years of experience building production ML systems. Strong in Python, TensorFlow, and cloud deployment. Led model improvements that increased accuracy by 15%.</p>
+                                <button type="button" class="btn-copy-summary" id="btn-copy-summary">Copy</button>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </section>

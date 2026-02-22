@@ -41,9 +41,6 @@
                     </svg>
                 </button>
             </form>
-            <div class="oauth-divider"><span>or</span></div>
-            <div id="google-signin-button" class="google-signin-button"></div>
-            <p id="google-auth-note" class="oauth-note"></p>
             <p class="form-footer">
                 Already have an account? <a href="login.html">Log In</a><br>
                 <a href="path-select.html" style="margin-top: 0.5rem; display: inline-block;">Choose your path →</a>
@@ -51,27 +48,20 @@
         </div>
     </div>
 
-    <script>
-        window.PATHFORGE_GOOGLE_CLIENT_ID = '635127589590-p5edf2oj0isoh6dplu39kd1oghh1cd31.apps.googleusercontent.com';
-    </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
     <script src="js/three-scene.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        initializeGoogleAuthOnLoad('signup');
-
-        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
 
-            const result = await signUp(name, email, password);
-            if (result.success) {
+            if (signUp(name, email, password)) {
                 window.location.href = 'path-select.html';
             } else {
-                alert(result.message || 'Sign up failed. Please try again.');
+                alert('This email is already registered. Please log in instead.');
             }
         });
     </script>
