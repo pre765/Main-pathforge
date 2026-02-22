@@ -17,8 +17,8 @@ let spawnX = window.innerWidth / 2;
 let spawnY = window.innerHeight + 80;
 
 /* Bubble config */
-const MIN_SIZE = 50;
-const MAX_SIZE = 120;
+const MIN_SIZE = 120;
+const MAX_SIZE = 200;
 const RISE_SPEED = 1.2;
 const SPREAD_FACTOR = 1.8;
 const BOUNCE_DAMPING = 0.6;
@@ -97,6 +97,12 @@ function updateBubbleElement(b) {
     b.el.style.height = `${b.size}px`;
     b.el.style.left = `${b.x - b.size / 2}px`;
     b.el.style.top = `${b.y - b.size / 2}px`;
+    // Ensure text is smaller than bubble
+    const textEl = b.el.querySelector('.bubble-text');
+    if (textEl) {
+        const fontSize = Math.max(12, b.size * 0.15); // Text is ~15% of bubble size
+        textEl.style.fontSize = `${fontSize}px`;
+    }
 }
 
 

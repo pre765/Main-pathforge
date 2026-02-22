@@ -7,7 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/profile-enhancements.css">
+    <link rel="stylesheet" href="css/profile-refactored.css">
+    <link rel="stylesheet" href="css/select-global.css">
 </head>
 <body class="profile-page">
     <div id="canvas-3d"></div>
@@ -31,14 +37,15 @@
         </div>
     </div>
 
-    <nav class="profile-tabs" role="tablist">
+    <nav class="profile-tabs" role="tablist" id="profile-tabs-nav">
         <button type="button" class="profile-tab active" role="tab" id="tab-dashboard" aria-selected="true">Dashboard</button>
         <button type="button" class="profile-tab" role="tab" id="tab-posts" aria-selected="false">Posts</button>
-        <a href="roadmap.html" class="profile-tab profile-tab-link">Roadmap</a>
-        <a href="interview-prep.html" class="profile-tab profile-tab-link">Interview Prep</a>
+        <a href="roadmap.html" class="profile-tab profile-tab-link student-only-tab">Roadmap</a>
+        <a href="interview-prep.html" class="profile-tab profile-tab-link student-only-tab">Interview Prep</a>
     </nav>
 
-    <div class="profile-grid tab-panel" id="panel-dashboard" role="tabpanel">
+    <!-- Student Profile Layout -->
+    <div class="profile-grid tab-panel" id="panel-dashboard" role="tabpanel" id="student-profile-layout">
         <aside class="profile-card">
             <div class="profile-avatar" id="avatar">U</div>
             <h2 id="profile-name">User</h2>
@@ -59,6 +66,31 @@
                 <span>Level</span>
                 <span id="user-level">Beginner</span>
             </div>
+
+            <!-- Role Selection Section -->
+            <div class="role-selection-section" id="role-selection-section">
+                <div class="role-option">
+                    <button type="button" class="role-btn role-btn-student" id="continue-as-student">
+                        <span class="role-icon">🎓</span>
+                        <span class="role-text">Continue as Student</span>
+                    </button>
+                </div>
+                <div class="role-option">
+                    <button type="button" class="role-btn role-btn-guide" id="here-as-guide">
+                        <span class="role-icon">👨‍🏫</span>
+                        <span class="role-text">Here as a Guide</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Student Guide Request Section (hidden by default) -->
+            <div class="student-guide-section" id="student-guide-section" style="display: none;">
+                <button type="button" class="btn-find-guides" id="btn-find-guides">
+                    <span class="guide-icon">🔍</span>
+                    Find Guides
+                </button>
+            </div>
+
             <div class="paths-section" id="paths-section" style="display: none;">
                 <div class="paths-label">Your Paths</div>
                 <div class="paths-list" id="paths-list"></div>
@@ -89,6 +121,95 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Guide Profile Layout — Premium SaaS (LinkedIn + Dribbble + Discord) -->
+    <div class="guide-profile-layout tab-panel" id="guide-profile-layout" role="tabpanel" style="display: none;">
+        <!-- Hero: banner + floating glass card + overlapping avatar + quick stats -->
+        <section class="guide-hero" aria-label="Profile hero">
+            <div class="guide-hero-banner" data-parallax></div>
+            <div class="guide-hero-card glass-card">
+                <div class="guide-hero-avatar-wrap">
+                    <div class="guide-hero-avatar" id="guide-avatar">U</div>
+                </div>
+                <div class="guide-hero-body">
+                    <div class="guide-hero-text">
+                        <h1 class="guide-hero-name" id="guide-profile-name">Guide Name</h1>
+                        <p class="guide-hero-headline" id="guide-headline">Expert in Domain</p>
+                        <p class="guide-hero-meta"><span id="guide-domain-text">Not Set</span></p>
+                    </div>
+                    <div class="guide-hero-stats">
+                        <div class="guide-stat"><span class="guide-stat-value" id="guide-stat-followers">0</span><span class="guide-stat-label">Followers</span></div>
+                        <div class="guide-stat"><span class="guide-stat-value" id="guide-stat-posts">0</span><span class="guide-stat-label">Posts</span></div>
+                        <div class="guide-stat"><span class="guide-stat-value" id="guide-stat-rating">—</span><span class="guide-stat-label">Rating</span></div>
+                    </div>
+                </div>
+                <div class="guide-hero-actions">
+                    <button type="button" class="btn-guide btn-guide-follow" id="btn-follow">Follow</button>
+                    <button type="button" class="btn-guide btn-guide-dm" id="btn-dm">DM Me</button>
+                    <button type="button" class="btn-guide btn-guide-requests" id="btn-student-requests" title="Check requests">Student Request</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content grid -->
+        <div class="guide-content">
+            <aside class="guide-sidebar">
+                <button type="button" class="btn-guide-saved" id="btn-saved-posts">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Saved Posts
+                </button>
+
+                <!-- About (collapsible) -->
+                <section class="guide-block guide-about">
+                    <button type="button" class="guide-block-header" aria-expanded="true" data-collapse="about">
+                        <span>About</span><svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="guide-block-body" id="guide-about-body">
+                        <p class="guide-about-text" id="guide-bio-text">No bio yet.</p>
+                    </div>
+                </section>
+
+                <!-- Skills with progress bars -->
+                <section class="guide-block guide-skills">
+                    <h3 class="guide-block-title">Skills</h3>
+                    <div class="guide-skills-list" id="guide-skills-list">
+                        <div class="guide-skill"><span class="guide-skill-name">Domain expertise</span><div class="guide-skill-bar"><span class="guide-skill-fill" id="guide-skill-domain" style="width: 0%"></span></div></div>
+                    </div>
+                </section>
+
+                <!-- Achievements badges -->
+                <section class="guide-block guide-badges">
+                    <h3 class="guide-block-title">Achievements</h3>
+                    <div class="guide-badges-grid" id="guide-badges-grid">
+                        <span class="guide-badge" title="First post">🌟</span>
+                        <span class="guide-badge" title="Helped 5 students">🎓</span>
+                        <span class="guide-badge" title="Top contributor">⭐</span>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="guide-main">
+                <!-- Activity heatmap (GitHub style) -->
+                <section class="guide-block guide-activity">
+                    <h3 class="guide-block-title">Activity</h3>
+                    <div class="guide-activity-heatmap" id="guide-activity-heatmap" aria-label="Contribution heatmap">
+                        <!-- 12 weeks x 7 days, filled by JS -->
+                    </div>
+                </section>
+
+                <!-- Recent Posts preview grid -->
+                <section class="guide-block guide-posts-preview">
+                    <div class="guide-posts-preview-header">
+                        <h3 class="guide-block-title">Recent Posts</h3>
+                        <a href="posts.html" class="link-muted">View all</a>
+                    </div>
+                    <div class="guide-posts-feed" id="guide-posts-feed">
+                        <!-- Injected by profile.js -->
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <div class="tab-panel profile-tab-content" id="panel-posts" role="tabpanel" hidden>

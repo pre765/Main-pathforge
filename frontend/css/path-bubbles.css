@@ -12,12 +12,44 @@ body {
     background: radial-gradient(ellipse at 50% 100%, #0a1a3e 0%, #030014 50%, #010008 100%);
 }
 
+/* Moving background animation */
+.path-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(100, 180, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255, 100, 180, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(100, 255, 200, 0.08) 0%, transparent 50%);
+    animation: moveBackground 20s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes moveBackground {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(-10%, -10%);
+    }
+    50% {
+        transform: translate(-5%, -15%);
+    }
+    75% {
+        transform: translate(-15%, -5%);
+    }
+}
+
 
 .path-page {
     position: relative;
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    z-index: 1;
 }
 
 .path-title {
@@ -108,11 +140,13 @@ body {
 .bubble .bubble-text {
     color: white;
     font-weight: 700;
-    font-size: clamp(0.7rem, 2.5vw, 1rem);
+    font-size: clamp(0.6rem, 1.8vw, 0.85rem);
     text-align: center;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    padding: 0.5em;
+    padding: 0.3em;
     line-height: 1.2;
+    max-width: 70%;
+    word-wrap: break-word;
 }
 
 /* Spawn point - single origin at bottom center */

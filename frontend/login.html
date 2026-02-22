@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log In | Welcome Back</title>
+    <title>Sign In | PathForge</title>
+    <script>window.location.replace('auth.html');</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <p>Redirecting to <a href="auth.html">Sign In</a>…</p>
     <div id="canvas-3d"></div>
 
     <div class="auth-container">
@@ -39,10 +41,11 @@
                     </svg>
                 </button>
             </form>
-         
             <p class="form-footer">
-                Don't have an account? <a href="index.html">Sign Up</a><br>
-                <a href="path-select.html" style="margin-top: 0.5rem; display: inline-block;">Choose your path →</a>
+                Don't have an account? <a href="index.html">Sign Up</a>
+            </p>
+            <p class="form-footer form-footer-link">
+                <a href="path-select.html">Choose your path →</a>
             </p>
         </div>
     </div>

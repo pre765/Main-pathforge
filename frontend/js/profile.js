@@ -77,6 +77,185 @@
         listEl.appendChild(tag);
     });
 
+    /* Role Selection Handling */
+    const roleSelectionSection = document.getElementById('role-selection-section');
+    const guideInfoSection = document.getElementById('guide-info-section');
+    const continueAsStudentBtn = document.getElementById('continue-as-student');
+    const hereAsGuideBtn = document.getElementById('here-as-guide');
+    const btnGuideRequests = document.getElementById('btn-guide-requests');
+    const studentGuideSection = document.getElementById('student-guide-section');
+    const studentProfileLayout = document.getElementById('panel-dashboard');
+    const guideProfileLayout = document.getElementById('guide-profile-layout');
+
+    // Check if user is already a guide
+    const userRole = user.role || 'student';
+    
+    if (userRole === 'guide' || userRole === 'mentor') {
+        // Hide student profile, show guide profile
+        if (studentProfileLayout) studentProfileLayout.style.display = 'none';
+        if (guideProfileLayout) {
+            guideProfileLayout.style.display = 'block';
+            // Initialize guide profile
+            initializeGuideProfile(user);
+        }
+        // Hide student-only tabs
+        document.querySelectorAll('.student-only-tab').forEach(tab => {
+            tab.style.display = 'none';
+        });
+    } else {
+        // Show student profile, hide guide profile
+        if (studentProfileLayout) studentProfileLayout.style.display = 'grid';
+        if (guideProfileLayout) guideProfileLayout.style.display = 'none';
+        
+        if (roleSelectionSection) roleSelectionSection.style.display = 'block';
+        if (guideInfoSection) guideInfoSection.style.display = 'none';
+        if (studentGuideSection) studentGuideSection.style.display = 'block';
+        // Show student-only tabs
+        document.querySelectorAll('.student-only-tab').forEach(tab => {
+            tab.style.display = 'inline-flex';
+        });
+    }
+
+    // Find guides button for students
+    document.getElementById('btn-find-guides')?.addEventListener('click', function() {
+        showFindGuides();
+    });
+
+    /* Initialize Guide Profile */
+    function initializeGuideProfile(guideUser) {
+        // Set profile picture
+        const initial = guideUser.name ? guideUser.name.charAt(0).toUpperCase() : 'G';
+        document.getElementById('guide-avatar').textContent = initial;
+        
+        // Set name and info
+        document.getElementById('guide-profile-name').textContent = guideUser.name || 'Guide';
+        document.getElementById('guide-headline').textContent = `${guideUser.guideExpertise || 'Expert'} in ${guideUser.guideDomain || 'Technology'}`;
+        document.getElementById('guide-domain-text').textContent = guideUser.guideDomain || 'Not Set';
+        
+        // Handle action buttons
+        document.getElementById('btn-follow')?.addEventListener('click', function() {
+            alert('Follow feature coming soon!');
+        });
+        
+        document.getElementById('btn-dm')?.addEventListener('click', function() {
+            alert('Direct messaging feature coming soon!');
+        });
+        
+        document.getElementById('btn-student-requests')?.addEventListener('click', function() {
+            showGuideRequests();
+        });
+        
+        document.getElementById('btn-saved-posts')?.addEventListener('click', function() {
+            showSavedPosts();
+        });
+        
+        // Load guide's posts
+        loadGuidePosts(guideUser);
+    }
+
+    /* Load Guide Posts */
+    function loadGuidePosts(guideUser) {
+        const feed = document.getElementById('guide-posts-feed');
+        if (!feed) return;
+        
+        // Get guide's posts from localStorage (in real app, from backend)
+        const allPosts = JSON.parse(localStorage.getItem('guide_posts') || '[]');
+        const guidePosts = allPosts.filter(p => p.authorEmail === guideUser.email);
+        
+        if (guidePosts.length === 0) {
+            feed.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No posts yet. Share your expertise with the community!</p>';
+            return;
+        }
+        
+        feed.innerHTML = '';
+        guidePosts.forEach(post => {
+            const postEl = document.createElement('div');
+            postEl.className = 'post-card';
+            const initial = post.author ? post.author.charAt(0).toUpperCase() : 'G';
+            postEl.innerHTML = `
+                <div class="post-card-header">
+                    <div class="post-avatar">${escapeHtml(initial)}</div>
+                    <div class="post-meta">
+                        <div class="post-author">${escapeHtml(post.author)}</div>
+                        <div class="post-headline">${escapeHtml(post.headline || 'Guide')}</div>
+                        <div class="post-time">${escapeHtml(post.time || 'Recently')}</div>
+                    </div>
+                </div>
+                <div class="post-body">${escapeHtml(post.body)}</div>
+                <div class="post-actions">
+                    <button type="button" class="post-action-btn">Like</button>
+                    <button type="button" class="post-action-btn">Comment</button>
+                    <button type="button" class="post-action-btn">Share</button>
+                </div>
+            `;
+            feed.appendChild(postEl);
+        });
+    }
+
+    /* Show Saved Posts */
+    function showSavedPosts() {
+        const savedPosts = JSON.parse(localStorage.getItem('saved_posts') || '[]');
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Saved Posts</h2>
+                    <button class="modal-close" type="button">&times;</button>
+                </div>
+                <div class="modal-body" id="saved-posts-list">
+                    ${savedPosts.length === 0 ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No saved posts</p>' : ''}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const postsList = document.getElementById('saved-posts-list');
+        savedPosts.forEach(post => {
+            const postEl = document.createElement('div');
+            postEl.className = 'post-card';
+            postEl.style.marginBottom = '1rem';
+            const initial = post.author ? post.author.charAt(0).toUpperCase() : 'U';
+            postEl.innerHTML = `
+                <div class="post-card-header">
+                    <div class="post-avatar">${escapeHtml(initial)}</div>
+                    <div class="post-meta">
+                        <div class="post-author">${escapeHtml(post.author)}</div>
+                        <div class="post-headline">${escapeHtml(post.headline || '')}</div>
+                        <div class="post-time">${escapeHtml(post.time || '')}</div>
+                    </div>
+                </div>
+                <div class="post-body">${escapeHtml(post.body)}</div>
+            `;
+            postsList.appendChild(postEl);
+        });
+        
+        modal.querySelector('.modal-close').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+
+    continueAsStudentBtn.addEventListener('click', function() {
+        // User continues as student - no action needed, just hide role selection
+        roleSelectionSection.style.display = 'none';
+    });
+
+    hereAsGuideBtn.addEventListener('click', function() {
+        // Redirect to guide signup page
+        window.location.href = 'guide-signup.html';
+    });
+
+    btnGuideRequests?.addEventListener('click', function() {
+        // Show guide requests modal/page
+        showGuideRequests();
+    });
+
     /* Account dropdown */
     const toggleBtn = document.getElementById('account-toggle-btn');
     const dropdown = document.getElementById('account-dropdown');
@@ -503,6 +682,189 @@
             link.className = 'topic-link';
             link.textContent = pathName;
             topicsList.appendChild(link);
+        });
+    }
+
+    /* Guide Requests Management */
+    function showGuideRequests() {
+        // Get pending requests from localStorage (in a real app, this would be from backend)
+        let requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+        
+        // Filter requests for this guide's domain
+        if (user.guideDomain) {
+            requests = requests.filter(r => r.guideEmail === user.email && r.domain === user.guideDomain);
+        } else {
+            requests = requests.filter(r => r.guideEmail === user.email);
+        }
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Student Requests</h2>
+                    <button class="modal-close" type="button">&times;</button>
+                </div>
+                <div class="modal-body" id="guide-requests-list">
+                    ${requests.length === 0 ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No pending requests</p>' : ''}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const requestsList = document.getElementById('guide-requests-list');
+        requests.forEach((request, index) => {
+            const requestEl = document.createElement('div');
+            requestEl.className = 'guide-request-item';
+            requestEl.innerHTML = `
+                <div class="request-info">
+                    <div class="request-student-name">${escapeHtml(request.studentName)}</div>
+                    <div class="request-student-email">${escapeHtml(request.studentEmail)}</div>
+                    <div class="request-domain">Domain: ${escapeHtml(request.domain)}</div>
+                    <div class="request-message">${escapeHtml(request.message || 'No message')}</div>
+                </div>
+                <div class="request-actions">
+                    <button class="btn-accept-request" data-index="${index}">Accept</button>
+                    <button class="btn-reject-request" data-index="${index}">Reject</button>
+                </div>
+            `;
+            requestsList.appendChild(requestEl);
+        });
+        
+        modal.querySelector('.modal-close').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        // Handle accept/reject
+        requestsList.querySelectorAll('.btn-accept-request').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                const request = requests[index];
+                // Accept request
+                const connections = JSON.parse(localStorage.getItem('guide_connections') || '[]');
+                connections.push({
+                    studentEmail: request.studentEmail,
+                    studentName: request.studentName,
+                    domain: request.domain,
+                    acceptedAt: new Date().toISOString()
+                });
+                localStorage.setItem('guide_connections', JSON.stringify(connections));
+                
+                // Remove from requests
+                requests.splice(index, 1);
+                localStorage.setItem('guide_requests', JSON.stringify(requests));
+                
+                modal.remove();
+                alert(`Connection accepted with ${request.studentName}`);
+            });
+        });
+        
+        requestsList.querySelectorAll('.btn-reject-request').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                requests.splice(index, 1);
+                localStorage.setItem('guide_requests', JSON.stringify(requests));
+                modal.remove();
+            });
+        });
+    }
+
+    /* Find Guides for Students */
+    function showFindGuides() {
+        // Get all guides from users
+        const users = getUsers();
+        const guides = Object.values(users).filter(u => u.role === 'guide' || u.role === 'mentor');
+        
+        // Get user's selected paths
+        const userPaths = getSelectedPaths();
+        const userDomain = userPaths.length > 0 ? userPaths[0] : 'General';
+        
+        // Filter guides by domain
+        const matchingGuides = guides.filter(g => g.guideDomain === userDomain || !g.guideDomain);
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Find Guides - ${userDomain}</h2>
+                    <button class="modal-close" type="button">&times;</button>
+                </div>
+                <div class="modal-body" id="guides-list">
+                    ${matchingGuides.length === 0 ? '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No guides available for this domain</p>' : ''}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const guidesList = document.getElementById('guides-list');
+        matchingGuides.forEach((guide) => {
+            if (guide.email === user.email) return; // Don't show self
+            
+            const guideEl = document.createElement('div');
+            guideEl.className = 'guide-request-item';
+            guideEl.innerHTML = `
+                <div class="request-info">
+                    <div class="request-student-name">${escapeHtml(guide.name)}</div>
+                    <div class="request-student-email">${escapeHtml(guide.email)}</div>
+                    <div class="request-domain">Domain: ${escapeHtml(guide.guideDomain || 'Not specified')}</div>
+                    <div class="request-domain">Expertise: ${escapeHtml(guide.guideExpertise || 'Not specified')}</div>
+                </div>
+                <div class="request-actions">
+                    <button class="btn-accept-request btn-request-guide" data-guide-email="${escapeHtml(guide.email)}" data-guide-name="${escapeHtml(guide.name)}" data-domain="${escapeHtml(guide.guideDomain || userDomain)}">Request Guide</button>
+                </div>
+            `;
+            guidesList.appendChild(guideEl);
+        });
+        
+        modal.querySelector('.modal-close').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        // Handle guide requests
+        guidesList.querySelectorAll('.btn-request-guide').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const guideEmail = this.dataset.guideEmail;
+                const guideName = this.dataset.guideName;
+                const domain = this.dataset.domain;
+                
+                // Create request
+                const requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+                const newRequest = {
+                    studentEmail: user.email,
+                    studentName: user.name,
+                    guideEmail: guideEmail,
+                    guideName: guideName,
+                    domain: domain,
+                    message: `Request from ${user.name} for ${domain}`,
+                    requestedAt: new Date().toISOString()
+                };
+                
+                // Check if request already exists
+                const exists = requests.some(r => r.studentEmail === user.email && r.guideEmail === guideEmail);
+                if (exists) {
+                    alert('You have already sent a request to this guide');
+                    return;
+                }
+                
+                requests.push(newRequest);
+                localStorage.setItem('guide_requests', JSON.stringify(requests));
+                
+                modal.remove();
+                alert(`Request sent to ${guideName}!`);
+            });
         });
     }
 })();

@@ -25,6 +25,32 @@ function signUp(name, email, password) {
         name: name.trim(),
         email: key,
         password: password,
+        role: 'student',
+        joinedAt: new Date().toISOString(),
+        progress: getDefaultProgress(),
+    };
+    saveUsers(users);
+
+    const session = { email: key, name: users[key].name };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return true;
+}
+
+/** Sign up as mentor: name, email, password, { domain, expertise, bio, years } */
+function signUpMentor(name, email, password, extra) {
+    const users = getUsers();
+    const key = email.toLowerCase().trim();
+    if (users[key]) return false;
+
+    users[key] = {
+        name: name.trim(),
+        email: key,
+        password: password,
+        role: 'guide',
+        guideDomain: extra.domain || '',
+        guideExpertise: extra.expertise || '',
+        guideBio: extra.bio || '',
+        guideYears: extra.years || '',
         joinedAt: new Date().toISOString(),
         progress: getDefaultProgress(),
     };
