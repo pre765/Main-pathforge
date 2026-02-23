@@ -7,6 +7,27 @@ import { promisify } from "node:util";
 
 export const runtime = "nodejs";
 
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+};
+
+function jsonResponse(body: unknown, init: ResponseInit = {}) {
+  return new NextResponse(JSON.stringify(body), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders,
+      ...(init.headers || {})
+    }
+  });
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 const MAX_BYTES = 10 * 1024 * 1024;
 let didInstallPdfPolyfills = false;
 const execFileAsync = promisify(execFile);
@@ -376,14 +397,14 @@ export async function POST(req: Request) {
     const contentType = req.headers.get("content-type") || "";
     const ctLower = contentType.toLowerCase();
     if (!ctLower.startsWith("multipart/form-data")) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Content-Type must be multipart/form-data." },
         { status: 415 }
       );
     }
     const boundary = getMultipartBoundary(contentType);
     if (!boundary) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Malformed multipart request: missing boundary. Do not set Content-Type manually." },
         { status: 415 }
       );
@@ -405,7 +426,7 @@ export async function POST(req: Request) {
         file = parsed.files.get("file") ?? null;
         jobDescription = parsed.fields.get("jobDescription")?.trim() ?? "";
       } catch {
-        return NextResponse.json(
+        return jsonResponse(
           {
             error:
               "Failed to parse multipart/form-data. Use form-data with a file field named 'file' and let the client set the boundary."
@@ -416,7 +437,7 @@ export async function POST(req: Request) {
     }
 
     if (!file) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Missing file field "file".' },
         { status: 400 }
       );
@@ -427,7 +448,7 @@ export async function POST(req: Request) {
     const fileSize = file instanceof File ? file.size : file.size;
 
     if (typeof fileSize === "number" && fileSize > MAX_BYTES) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: `PDF too large. Max ${Math.round(MAX_BYTES / (1024 * 1024))}MB.` },
         { status: 413 }
       );
@@ -439,14 +460,14 @@ export async function POST(req: Request) {
     const looksLikePdfByType =
       fileType.toLowerCase().includes("pdf") || fileName.toLowerCase().endsWith(".pdf");
     if (!looksLikePdfByType && !isPdf(buffer)) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Only PDF uploads are allowed." },
         { status: 415 }
       );
     }
 
     if (!isPdf(buffer)) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "Invalid PDF file." },
         { status: 400 }
       );
@@ -479,7 +500,7 @@ export async function POST(req: Request) {
         resumeText = await extractTextWithPdfToText(buffer);
       } catch (fallbackError) {
         console.error("pdftotext fallback failed:", fallbackError);
-        return NextResponse.json(
+        return jsonResponse(
           {
             error: "Unable to extract text from this PDF.",
             details: `pdf-parse: ${primaryParseError || "empty text"}; pdftotext: ${errorToMessage(fallbackError)}`
@@ -490,7 +511,7 @@ export async function POST(req: Request) {
     }
 
     if (!resumeText) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "PDF text is empty. Use a text-based PDF (not image-only/scanned)." },
         { status: 422 }
       );
@@ -511,7 +532,7 @@ export async function POST(req: Request) {
     try {
       result = analyzeBodyText ? JSON.parse(analyzeBodyText) : {};
     } catch {
-      return NextResponse.json(
+      return jsonResponse(
         {
           error: "Analyze service returned a non-JSON response.",
           details: analyzeBodyText.slice(0, 500)
@@ -520,11 +541,11 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json(result, { status: analyzeResponse.status });
+    return jsonResponse(result, { status: analyzeResponse.status });
   } catch (error) {
     console.error("Upload failed:", error);
     const message = error instanceof Error ? error.message : "Unknown upload error.";
-    return NextResponse.json(
+    return jsonResponse(
       {
         error: "Resume upload parsing failed.",
         details: message

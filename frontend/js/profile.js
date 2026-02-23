@@ -1,5 +1,6 @@
 /* Profile page - load user data and render charts (multi-path support) */
 (function() {
+<<<<<<< HEAD
     // Check if viewing another user's profile
     const urlParams = new URLSearchParams(window.location.search);
     const viewingProfileEmail = urlParams.get('profile');
@@ -19,6 +20,10 @@
         }
         user = viewedUser;
     }
+=======
+    const user = getFullUser();
+    const API_BASE = (localStorage.getItem('pathforge_api_base') || 'http://localhost:5000').replace(/\/$/, '');
+>>>>>>> 13fc30d (resume analysis added)
 
     function redirectToLogin() {
         window.location.href = 'login.html';
@@ -27,6 +32,23 @@
     if (!user || !currentUser) {
         redirectToLogin();
         return;
+    }
+
+    async function apiRequest(path, options = {}) {
+        const response = await fetch(`${API_BASE}${path}`, {
+            method: options.method || 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            },
+            ...(options.body ? { body: JSON.stringify(options.body) } : {})
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success === false) {
+            throw new Error(payload.message || `Request failed (${response.status})`);
+        }
+        return payload;
     }
 
     let paths = getSelectedPaths();
@@ -818,15 +840,40 @@
     }
 
     /* Guide Requests Management */
-    function showGuideRequests() {
-        // Get pending requests from localStorage (in a real app, this would be from backend)
-        let requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
-        
-        // Filter requests for this guide's domain
-        if (user.guideDomain) {
-            requests = requests.filter(r => r.guideEmail === user.email && r.domain === user.guideDomain);
-        } else {
-            requests = requests.filter(r => r.guideEmail === user.email);
+    async function showGuideRequests() {
+        let requests = [];
+        let usingBackend = false;
+
+        const guiderKey = user._id || user.id || user.email;
+        if (guiderKey) {
+            try {
+                const backend = await apiRequest(`/api/request/guider/${encodeURIComponent(guiderKey)}`);
+                requests = (backend.data || []).map((request) => ({
+                    id: request._id,
+                    studentName: request.student?.name || 'Unknown student',
+                    studentEmail: request.student?.email || 'Unknown email',
+                    domain: request.guider?.selectedDomain || user.guideDomain || 'General',
+                    message: 'Pending connection request',
+                    source: 'backend'
+                }));
+                usingBackend = true;
+            } catch (_) {
+                usingBackend = false;
+            }
+        }
+
+        if (!usingBackend) {
+            requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+            if (user.guideDomain) {
+                requests = requests.filter(r => r.guideEmail === user.email && r.domain === user.guideDomain);
+            } else {
+                requests = requests.filter(r => r.guideEmail === user.email);
+            }
+            requests = requests.map((request, index) => ({
+                ...request,
+                localIndex: index,
+                source: 'local'
+            }));
         }
         
         // Create modal
@@ -858,8 +905,8 @@
                     <div class="request-message">${escapeHtml(request.message || 'No message')}</div>
                 </div>
                 <div class="request-actions">
-                    <button class="btn-accept-request" data-index="${index}">Accept</button>
-                    <button class="btn-reject-request" data-index="${index}">Reject</button>
+                    <button class="btn-accept-request" data-index="${index}" data-request-id="${escapeHtml(request.id || '')}" data-source="${escapeHtml(request.source || 'local')}">Accept</button>
+                    <button class="btn-reject-request" data-index="${index}" data-source="${escapeHtml(request.source || 'local')}">Reject</button>
                 </div>
             `;
             requestsList.appendChild(requestEl);
@@ -875,10 +922,27 @@
         
         // Handle accept/reject
         requestsList.querySelectorAll('.btn-accept-request').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', async function() {
                 const index = parseInt(this.dataset.index);
                 const request = requests[index];
-                // Accept request
+
+                if (!request) return;
+
+                if (request.source === 'backend' && request.id) {
+                    try {
+                        await apiRequest('/api/request/accept', {
+                            method: 'PUT',
+                            body: { requestId: request.id }
+                        });
+                        modal.remove();
+                        alert(`Connection accepted with ${request.studentName}`);
+                        return;
+                    } catch (error) {
+                        alert(error.message || 'Failed to accept request from server.');
+                        return;
+                    }
+                }
+
                 const connections = JSON.parse(localStorage.getItem('guide_connections') || '[]');
                 connections.push({
                     studentEmail: request.studentEmail,
@@ -887,11 +951,13 @@
                     acceptedAt: new Date().toISOString()
                 });
                 localStorage.setItem('guide_connections', JSON.stringify(connections));
-                
-                // Remove from requests
-                requests.splice(index, 1);
-                localStorage.setItem('guide_requests', JSON.stringify(requests));
-                
+
+                const localRequests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+                if (typeof request.localIndex === 'number' && localRequests[request.localIndex]) {
+                    localRequests.splice(request.localIndex, 1);
+                    localStorage.setItem('guide_requests', JSON.stringify(localRequests));
+                }
+
                 modal.remove();
                 alert(`Connection accepted with ${request.studentName}`);
             });
@@ -900,8 +966,14 @@
         requestsList.querySelectorAll('.btn-reject-request').forEach(btn => {
             btn.addEventListener('click', function() {
                 const index = parseInt(this.dataset.index);
-                requests.splice(index, 1);
-                localStorage.setItem('guide_requests', JSON.stringify(requests));
+                const request = requests[index];
+                if (request && request.source === 'local') {
+                    const localRequests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+                    if (typeof request.localIndex === 'number' && localRequests[request.localIndex]) {
+                        localRequests.splice(request.localIndex, 1);
+                        localStorage.setItem('guide_requests', JSON.stringify(localRequests));
+                    }
+                }
                 modal.remove();
             });
         });
@@ -986,17 +1058,28 @@
     }
 
     /* Find Guides for Students */
-    function showFindGuides() {
-        // Get all guides from users
-        const users = getUsers();
-        const guides = Object.values(users).filter(u => u.role === 'guide' || u.role === 'mentor');
-        
-        // Get user's selected paths
+    async function showFindGuides() {
         const userPaths = getSelectedPaths();
         const userDomain = userPaths.length > 0 ? userPaths[0] : 'General';
-        
-        // Filter guides by domain
-        const matchingGuides = guides.filter(g => g.guideDomain === userDomain || !g.guideDomain);
+
+        let matchingGuides = [];
+        try {
+            const backend = await apiRequest(`/api/request/guiders${userDomain ? `?domain=${encodeURIComponent(userDomain)}` : ''}`);
+            matchingGuides = (backend.data || []).map((guide) => ({
+                id: guide._id || guide.id || null,
+                name: guide.name,
+                email: guide.email,
+                guideDomain: guide.selectedDomain || '',
+                guideExpertise: guide.skillLevel || 'Not specified',
+                source: 'backend'
+            }));
+        } catch (_) {
+            const users = getUsers();
+            const guides = Object.values(users).filter(u => u.role === 'guide' || u.role === 'mentor');
+            matchingGuides = guides
+                .filter(g => g.guideDomain === userDomain || !g.guideDomain)
+                .map((guide) => ({ ...guide, source: 'local' }));
+        }
         
         // Create modal
         const modal = document.createElement('div');
@@ -1029,7 +1112,7 @@
                     <div class="request-domain">Expertise: ${escapeHtml(guide.guideExpertise || 'Not specified')}</div>
                 </div>
                 <div class="request-actions">
-                    <button class="btn-accept-request btn-request-guide" data-guide-email="${escapeHtml(guide.email)}" data-guide-name="${escapeHtml(guide.name)}" data-domain="${escapeHtml(guide.guideDomain || userDomain)}">Request Guide</button>
+                    <button class="btn-accept-request btn-request-guide" data-guide-id="${escapeHtml(guide.id || '')}" data-guide-email="${escapeHtml(guide.email)}" data-guide-name="${escapeHtml(guide.name)}" data-domain="${escapeHtml(guide.guideDomain || userDomain)}" data-source="${escapeHtml(guide.source || 'local')}">Request Guide</button>
                 </div>
             `;
             guidesList.appendChild(guideEl);
@@ -1045,12 +1128,32 @@
         
         // Handle guide requests
         guidesList.querySelectorAll('.btn-request-guide').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', async function() {
+                const guideId = this.dataset.guideId;
                 const guideEmail = this.dataset.guideEmail;
                 const guideName = this.dataset.guideName;
                 const domain = this.dataset.domain;
-                
-                // Create request
+                const source = this.dataset.source || 'local';
+
+                if (source === 'backend') {
+                    try {
+                        await apiRequest('/api/request/send', {
+                            method: 'POST',
+                            body: {
+                                studentId: user._id || user.id,
+                                guiderId: guideId || undefined,
+                                studentEmail: user.email,
+                                guiderEmail: guideEmail
+                            }
+                        });
+                        modal.remove();
+                        alert(`Request sent to ${guideName}!`);
+                        return;
+                    } catch (_) {
+                        // Fall through to local fallback.
+                    }
+                }
+
                 const requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
                 const newRequest = {
                     studentEmail: user.email,
@@ -1071,7 +1174,7 @@
                 
                 requests.push(newRequest);
                 localStorage.setItem('guide_requests', JSON.stringify(requests));
-                
+
                 modal.remove();
                 alert(`Request sent to ${guideName}!`);
             });

@@ -5,6 +5,10 @@
         return;
     }
 
+    if (!localStorage.getItem('pathforge_api_base')) {
+        localStorage.setItem('pathforge_api_base', 'http://localhost:5000');
+    }
+
     // Navigation
     const navItems = document.querySelectorAll('.prep-nav-item');
     const sections = document.querySelectorAll('.prep-section');
@@ -179,90 +183,374 @@ ${data['past-jobs'] ? '\\subsection*{Previous Experience}\n' + data['past-jobs']
 
     // ========== Resume Intelligence Engine ==========
     const btnAnalyze = document.getElementById('btn-analyze');
-    const analyzeSpinner = document.getElementById('analyze-spinner');
     const resultsContainer = document.getElementById('results-container');
-    const scoreBig = document.getElementById('score-big');
+    const scoreBig = document.getElementById('score-big-new');
     const readinessBadge = document.getElementById('readiness-badge');
     const scoreExplanation = document.getElementById('score-explanation');
-    const scoreProgressFill = document.getElementById('score-progress-fill');
+    const keywordMatchValue = document.getElementById('keyword-match-value');
+    function resolveApiBases() {
+        const bases = [];
+        const configuredGeneral = (localStorage.getItem('pathforge_api_base') || '').trim();
+        const configuredResume = (localStorage.getItem('pathforge_resume_api_base') || '').trim();
 
-    if (btnAnalyze) {
-        btnAnalyze.addEventListener('click', function() {
-            const resumeText = document.getElementById('resume-text');
-            const jdText = document.getElementById('jd-text');
-            if (!resumeText || !jdText) return;
+        if (configuredGeneral) bases.push(configuredGeneral.replace(/\/$/, ''));
+        if (configuredResume) bases.push(configuredResume.replace(/\/$/, ''));
 
-            btnAnalyze.classList.add('loading');
-            btnAnalyze.setAttribute('aria-busy', 'true');
+        const host = window.location.hostname;
+        const port = window.location.port;
+        const isLikelyStaticServer = port === '5500' || port === '5501' || port === '5502';
+        const isLoopback = host === '127.0.0.1' || host === 'localhost';
+        if (isLikelyStaticServer && isLoopback) {
+            bases.push('http://localhost:3000');
+        }
+        bases.push('');
 
-            setTimeout(function() {
-                btnAnalyze.classList.remove('loading');
-                btnAnalyze.setAttribute('aria-busy', 'false');
+        return [...new Set(bases)];
+    }
+    const API_BASES = resolveApiBases();
 
-                const score = Math.floor(Math.random() * 25) + 70;
-                scoreBig.textContent = score + '%';
-                if (scoreProgressFill) scoreProgressFill.style.width = score + '%';
+    function getApiUrls(path) {
+        return API_BASES.map((base) => (base ? `${base}${path}` : path));
+    }
 
-                const levels = [
-                    { badge: 'Strong Candidate', text: 'You meet most required skills but lack some preferred tools.' },
-                    { badge: 'Good Fit', text: 'Your profile aligns well with the role; a few tweaks could strengthen your application.' },
-                    { badge: 'Needs Work', text: 'Several key skills or experience points are missing. Use the checklist and roadmap below.' }
-                ];
-                const level = score >= 75 ? levels[0] : score >= 55 ? levels[1] : levels[2];
-                readinessBadge.textContent = level.badge;
-                scoreExplanation.textContent = level.text;
+    function setAnalyzeLoading(isLoading) {
+        if (!btnAnalyze) return;
+        btnAnalyze.classList.toggle('loading', isLoading);
+        btnAnalyze.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+        btnAnalyze.disabled = isLoading;
+    }
 
-                resultsContainer.hidden = false;
-                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function showAnalyzeError(message) {
+        alert(message || 'Failed to analyze resume.');
+    }
 
-                populateInterviewQuestions();
-            }, 1800);
+    function fillList(id, items) {
+        const list = document.getElementById(id);
+        if (!list) return;
+        list.innerHTML = '';
+        (items || []).forEach(function(item) {
+            const li = document.createElement('li');
+            li.textContent = item;
+            list.appendChild(li);
         });
     }
 
-    function populateInterviewQuestions() {
-        const technical = [
-            'Explain Docker architecture and when to use containers.',
-            'What is overfitting and how do you prevent it?',
-            'Describe the difference between REST and GraphQL.',
-            'How would you debug a memory leak in a Node.js application?',
-            'Explain CI/CD and how you have used it.',
-            'What is the time complexity of a hash map lookup?',
-            'Describe how you would design a rate-limiting system.'
-        ];
-        const behavioral = [
-            'Tell me about a time you had to meet a tight deadline.',
-            'Describe a situation where you had to work with a difficult stakeholder.',
-            'Give an example of when you took the lead on a project.',
-            'How do you handle receiving critical feedback?',
-            'Tell me about a time you failed and what you learned.',
-            'Describe how you prioritize tasks when everything is urgent.',
-            'Give an example of when you had to learn something new quickly.'
-        ];
-        const project = [
-            'Walk me through the most complex project you have worked on.',
-            'What would you do differently if you could rebuild a past project?',
-            'How did you measure success for your last project?',
-            'Describe a technical decision you made and its trade-offs.',
-            'How did you handle scope creep or changing requirements?',
-            'What tools and processes did you use for collaboration?',
-            'How did you ensure code quality and maintainability?'
-        ];
+    function getStatusClass(items) {
+        const count = (items || []).length;
+        if (count === 0) return 'status-good';
+        if (count <= 2) return 'status-medium';
+        return 'status-needs';
+    }
 
-        function fillList(id, items) {
-            const list = document.getElementById(id);
-            if (!list) return;
-            list.innerHTML = '';
-            items.forEach(function(q) {
+    function getStatusLabel(items) {
+        const count = (items || []).length;
+        if (count === 0) return 'Good';
+        if (count <= 2) return 'Moderate';
+        return 'Needs Improvement';
+    }
+
+    function renderBreakdownCard(cardKey, items) {
+        const card = document.querySelector(`[data-card="${cardKey}"]`);
+        if (!card) return;
+        const ul = card.querySelector('.breakdown-bullets');
+        const badge = card.querySelector('.status-badge');
+        if (ul) {
+            ul.innerHTML = '';
+            if ((items || []).length === 0) {
                 const li = document.createElement('li');
-                li.textContent = q;
-                list.appendChild(li);
-            });
+                li.textContent = 'No major issues detected.';
+                ul.appendChild(li);
+            } else {
+                items.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+            }
+        }
+        if (badge) {
+            badge.classList.remove('status-good', 'status-medium', 'status-needs');
+            badge.classList.add(getStatusClass(items));
+            badge.textContent = getStatusLabel(items);
+        }
+    }
+
+    function renderRoadmapRecommendations(items) {
+        const roadmapModules = document.getElementById('roadmap-modules');
+        if (!roadmapModules) return;
+        roadmapModules.innerHTML = '';
+
+        const recommendations = (items || []).filter(Boolean);
+        if (recommendations.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'module-card';
+            empty.textContent = 'No roadmap recommendations right now.';
+            roadmapModules.appendChild(empty);
+            return;
         }
 
-        fillList('iq-list-technical', technical);
-        fillList('iq-list-behavioral', behavioral);
-        fillList('iq-list-project', project);
+        recommendations.forEach((moduleName) => {
+            const link = document.createElement('a');
+            link.href = 'roadmap.html';
+            link.className = 'module-card';
+            link.textContent = moduleName;
+            roadmapModules.appendChild(link);
+        });
+    }
+
+    function renderChecklist(containerId, items, fallbackText) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!items || items.length === 0) {
+            const row = document.createElement('label');
+            row.className = 'checklist-item';
+            row.innerHTML = `<span>${escapeHtml(fallbackText)}</span>`;
+            container.appendChild(row);
+            return;
+        }
+
+        items.forEach((item) => {
+            const row = document.createElement('label');
+            row.className = 'checklist-item';
+            row.innerHTML = `<input type="checkbox"> <span>${escapeHtml(item)}</span>`;
+            const checkbox = row.querySelector('input');
+            const text = row.querySelector('span');
+            if (checkbox && text) {
+                checkbox.addEventListener('change', function() {
+                    text.style.textDecoration = checkbox.checked ? 'line-through' : '';
+                });
+            }
+            container.appendChild(row);
+        });
+    }
+
+    function renderSkillGaps(items) {
+        const skillsGapList = document.getElementById('skills-gap-list');
+        if (!skillsGapList) return;
+        skillsGapList.innerHTML = '';
+        if (!items || items.length === 0) {
+            const badge = document.createElement('span');
+            badge.className = 'skill-gap-badge';
+            badge.textContent = 'No critical skill gaps';
+            skillsGapList.appendChild(badge);
+            return;
+        }
+        items.forEach((skill) => {
+            const badge = document.createElement('span');
+            badge.className = 'skill-gap-badge';
+            badge.textContent = skill;
+            skillsGapList.appendChild(badge);
+        });
+    }
+
+    function renderInterviewQuestions(aiInsights, flatQuestions) {
+        const technical = aiInsights?.interviewQuestions?.technicalQuestions || [];
+        const behavioral = aiInsights?.interviewQuestions?.behavioralQuestions || [];
+        const project = aiInsights?.interviewQuestions?.projectBasedQuestions || [];
+
+        if (technical.length || behavioral.length || project.length) {
+            fillList('iq-list-technical', technical);
+            fillList('iq-list-behavioral', behavioral);
+            fillList('iq-list-project', project);
+            return;
+        }
+
+        const list = Array.isArray(flatQuestions) ? flatQuestions : [];
+        fillList('iq-list-technical', list.slice(0, 5));
+        fillList('iq-list-behavioral', list.slice(5, 10));
+        fillList('iq-list-project', list.slice(10, 15));
+    }
+
+    function renderAnalyzeResult(result) {
+        const score = Math.round(Number(result?.atsScore ?? result?.finalScore ?? 0));
+        const requiredScore = Math.round(Number(result?.requiredSkillScore ?? 0));
+        const readiness = result?.readinessLevel || 'Needs Improvement';
+        const atsExplanation =
+            result?.aiInsights?.atsCompatibilityExplanation ||
+            `Your resume ATS alignment is ${score}%. Focus on missing skills and quantified achievements.`;
+        const summary =
+            result?.improvedResumeSuggestion ||
+            result?.aiInsights?.professionalSummarySuggestion ||
+            'No summary suggestion available yet.';
+
+        if (scoreBig) scoreBig.textContent = String(score);
+        if (keywordMatchValue) keywordMatchValue.textContent = `${requiredScore}%`;
+        if (readinessBadge) readinessBadge.textContent = readiness;
+        if (scoreExplanation) scoreExplanation.textContent = atsExplanation;
+        if (typeof window.animateAtsScore === 'function') window.animateAtsScore(score);
+
+        renderBreakdownCard('skills', result?.aiInsights?.analysisBreakdown?.skillsMatch || []);
+        renderBreakdownCard('experience', result?.aiInsights?.analysisBreakdown?.experienceStrength || []);
+        renderBreakdownCard('impact', result?.aiInsights?.analysisBreakdown?.impactAndMetrics || []);
+        renderBreakdownCard('branding', result?.aiInsights?.analysisBreakdown?.professionalBranding || []);
+
+        renderSkillGaps(result?.missingSkills || []);
+
+        const checklist = (result?.improvements && result.improvements.length > 0)
+            ? result.improvements
+            : (result?.aiInsights?.immediateActionChecklist || []);
+        renderChecklist('action-checklist', checklist, 'No immediate fixes suggested.');
+        renderRoadmapRecommendations(result?.roadmapRecommendations || []);
+        renderInterviewQuestions(result?.aiInsights, result?.interviewQuestions);
+
+        const summaryText = document.getElementById('summary-text');
+        if (summaryText) summaryText.textContent = summary;
+
+        if (resultsContainer) {
+            resultsContainer.hidden = false;
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    async function analyzeWithText(resumeText, jobDescription) {
+        const urls = getApiUrls('/api/resume/analyze');
+        for (let i = 0; i < urls.length; i++) {
+            let response;
+            try {
+                response = await fetch(urls[i], {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resumeText, jobDescription })
+                });
+            } catch (_networkError) {
+                continue;
+            }
+
+            const rawText = await response.text();
+            let data = {};
+            try {
+                data = rawText ? JSON.parse(rawText) : {};
+            } catch (_) {
+                data = {};
+            }
+
+            if (response.ok) return data;
+
+            if (response.status === 404 || response.status === 405) {
+                continue;
+            }
+
+            const details = rawText && !data?.error ? ` (${rawText.slice(0, 120)})` : '';
+            throw new Error(data?.error || data?.message || `Analyze API failed (${response.status})${details}`);
+        }
+
+        throw new Error('Cannot reach Resume Analyze API. Start Next app on http://localhost:3000 or set localStorage.pathforge_resume_api_base.');
+    }
+
+    async function analyzeWithUpload(file, jobDescription) {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('jobDescription', jobDescription || '');
+
+        const urls = getApiUrls('/api/resume/upload');
+        for (let i = 0; i < urls.length; i++) {
+            let response;
+            try {
+                response = await fetch(urls[i], {
+                    method: 'POST',
+                    body: form
+                });
+            } catch (_networkError) {
+                continue;
+            }
+
+            const rawText = await response.text();
+            let data = {};
+            try {
+                data = rawText ? JSON.parse(rawText) : {};
+            } catch (_) {
+                data = {};
+            }
+
+            if (response.ok) return data;
+
+            if (response.status === 404 || response.status === 405) {
+                continue;
+            }
+
+            const details = rawText && !data?.error ? ` (${rawText.slice(0, 120)})` : '';
+            throw new Error(data?.error || data?.message || `Upload API failed (${response.status})${details}`);
+        }
+
+        throw new Error('Cannot reach Resume Upload API. Start Next app on http://localhost:3000 or set localStorage.pathforge_resume_api_base.');
+    }
+
+    function readTextFromFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                resolve(String(e.target?.result || ''));
+            };
+            reader.onerror = function() {
+                reject(new Error('Unable to read the selected job description file.'));
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    if (btnAnalyze) {
+        btnAnalyze.addEventListener('click', async function() {
+            const resumeTextEl = document.getElementById('resume-text');
+            const jdTextEl = document.getElementById('jd-text');
+            const resumeUploadInput = document.getElementById('resume-upload-input');
+            const roleSelect = document.getElementById('job-role-select');
+            const levelSelect = document.getElementById('experience-level-select');
+
+            if (!resumeTextEl || !jdTextEl) return;
+
+            const activeUploadTab = document.querySelector('.upload-method-tab.active');
+            const activeMethod = activeUploadTab?.dataset?.method || 'paste';
+
+            const jdUploadInput = document.getElementById('jd-upload-input');
+            const roleContext = roleSelect && roleSelect.value ? `Target Role: ${roleSelect.options[roleSelect.selectedIndex].text}` : '';
+            const levelContext = levelSelect && levelSelect.value ? `Candidate Level: ${levelSelect.options[levelSelect.selectedIndex].text}` : '';
+            const extraContext = [roleContext, levelContext].filter(Boolean).join('\n');
+
+            let baseJd = (jdTextEl.value || '').trim();
+            if (!baseJd && jdUploadInput && jdUploadInput.files && jdUploadInput.files[0]) {
+                const jdFile = jdUploadInput.files[0];
+                if (!/\.txt$/i.test(jdFile.name) && jdFile.type !== 'text/plain') {
+                    throw new Error('Job description upload supports text files (.txt) only. Paste JD text for PDF/DOCX.');
+                }
+                baseJd = (await readTextFromFile(jdFile)).trim();
+                jdTextEl.value = baseJd;
+            }
+
+            const finalJd = extraContext ? [baseJd, extraContext].filter(Boolean).join('\n\n') : baseJd;
+
+            try {
+                setAnalyzeLoading(true);
+                let result;
+
+                if (activeMethod === 'upload' && resumeUploadInput && resumeUploadInput.files && resumeUploadInput.files[0]) {
+                    const file = resumeUploadInput.files[0];
+                    if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+                        throw new Error('Resume upload must be a PDF for backend parsing.');
+                    }
+                    if (!finalJd) {
+                        throw new Error('Job description text is required. Paste it in the textbox or upload a .txt file.');
+                    }
+                    result = await analyzeWithUpload(file, finalJd);
+                } else {
+                    const resumeText = (resumeTextEl.value || '').trim();
+                    if (!resumeText) {
+                        throw new Error('Please paste resume text or upload a PDF resume.');
+                    }
+                    if (!finalJd) {
+                        throw new Error('Please provide a job description.');
+                    }
+                    result = await analyzeWithText(resumeText, finalJd);
+                }
+
+                renderAnalyzeResult(result);
+            } catch (error) {
+                showAnalyzeError(error?.message || 'Analysis failed.');
+            } finally {
+                setAnalyzeLoading(false);
+            }
+        });
     }
 
     // Interview question tabs

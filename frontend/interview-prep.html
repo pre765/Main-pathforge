@@ -127,21 +127,21 @@
                         <!-- Upload Method (Hidden by default) -->
                         <div id="upload-method" style="display: none;">
                             <div class="input-group-hero">
-                                <label>Upload Resume (PDF, DOCX, or TXT)</label>
+                                <label>Upload Resume (PDF only)</label>
                                 <div class="upload-zone" id="resume-upload-zone">
                                     <div class="upload-icon">📄</div>
                                     <div class="upload-zone-text">Drag your resume here</div>
                                     <div class="upload-zone-hint">or click to browse</div>
-                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,application/pdf">
                                 </div>
                             </div>
                             <div class="input-group-hero">
-                                <label>Upload Job Description (Optional)</label>
+                                <label>Job Description Text (Required)</label>
                                 <div class="upload-zone" id="jd-upload-zone">
                                     <div class="upload-icon">📋</div>
-                                    <div class="upload-zone-text">Drag job description here</div>
-                                    <div class="upload-zone-hint">or click to browse</div>
-                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+                                    <div class="upload-zone-text">Drag job description .txt here</div>
+                                    <div class="upload-zone-hint">or paste into "Job Description" textbox</div>
+                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".txt,text/plain">
                                 </div>
                             </div>
                         </div>

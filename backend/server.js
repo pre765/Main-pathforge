@@ -13,10 +13,12 @@ app.use(express.json());
 const authRoutes = require("./routes/authRoutes");
 const guiderRoutes = require("./routes/guiderRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/guider", guiderRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/resume", resumeRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -40,7 +42,6 @@ async function startServer() {
 }
 
 const requestRoutes = require("./routes/requestRoutes");
-
 app.use("/api/request", requestRoutes);
 
 startServer();
