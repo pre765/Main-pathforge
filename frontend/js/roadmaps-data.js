@@ -56,3 +56,23 @@ function getRoadmapsData() {
 function getRecommendedPathOrder() {
     return ['Web Development', 'Data Science', 'AIML', 'Cloud Computing', 'Cyber Security', 'Product & Design'];
 }
+
+/* Optional structured checklist topics used by the new roadmap UI. Keys match selectedPath values stored in localStorage (e.g. 'frontend','backend','aiml').
+     If absent, the roadmap will fallback to `subSteps` from phases. */
+window.roadmapTopics = {
+    frontend: {
+        1: ['What is HTML', 'Tags', 'Elements'],
+        2: ['CSS Basics', 'Selectors', 'Box Model'],
+        3: ['Flexbox', 'Grid', 'Responsive Design'],
+        4: ['JavaScript Basics', 'DOM', 'Events']
+    },
+    backend: {
+        1: ['What is a Server', 'HTTP Basics', 'Node.js Intro'],
+        2: ['Routing', 'Middleware', 'REST APIs'],
+        3: ['Databases', 'ORMs', 'Migrations']
+    },
+    aiml: {
+        1: ['Python Basics', 'NumPy Intro', 'Pandas Overview'],
+        2: ['Statistics', 'Linear Algebra', 'Probability']
+    }
+};

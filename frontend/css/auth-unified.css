@@ -208,6 +208,17 @@
   transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
 
+/* Prevent pseudo-element artifacts in inputs and selects */
+.input-wrap input::before,
+.input-wrap input::after,
+.input-wrap select::before,
+.input-wrap select::after,
+.input-wrap textarea::before,
+.input-wrap textarea::after {
+  display: none !important;
+  content: none !important;
+}
+
 .input-wrap input::placeholder,
 .input-wrap textarea::placeholder {
   color: transparent;
@@ -230,6 +241,13 @@
   font-size: var(--text-base);
   pointer-events: none;
   transition: all var(--duration-normal) var(--ease-out);
+}
+
+/* Prevent any pseudo-element content from appearing on labels */
+.input-wrap label::before,
+.input-wrap label::after {
+  display: none !important;
+  content: none !important;
 }
 
 .input-wrap textarea + label {
@@ -437,6 +455,26 @@
 
 .auth-footer .link-muted {
   font-size: var(--text-sm);
+}
+
+/* ----- Mentor Fields Animation ----- */
+.mentor-fields {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.mentor-fields.hidden {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.mentor-fields.visible {
+  opacity: 1;
+  max-height: 500px;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 /* Responsive */

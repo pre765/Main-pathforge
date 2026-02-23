@@ -19,6 +19,13 @@
     <div id="canvas-3d"></div>
     <div class="profile-header-bar">
         <h1>My Dashboard</h1>
+        <div class="search-container">
+            <input type="text" id="global-search-input" class="search-input" placeholder="Search mentors, students..." aria-label="Search users">
+            <button id="global-search-btn" class="search-btn" aria-label="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+            </button>
+            <div id="search-results" class="search-results hidden" role="listbox" aria-label="Search results"></div>
+        </div>
         <div class="header-actions">
             <a href="posts.html" class="post-nav-btn">Post</a>
             <a href="interview-prep.html#check-resume" class="post-nav-btn">Resume</a>
@@ -67,21 +74,7 @@
                 <span id="user-level">Beginner</span>
             </div>
 
-            <!-- Role Selection Section -->
-            <div class="role-selection-section" id="role-selection-section">
-                <div class="role-option">
-                    <button type="button" class="role-btn role-btn-student" id="continue-as-student">
-                        <span class="role-icon">🎓</span>
-                        <span class="role-text">Continue as Student</span>
-                    </button>
-                </div>
-                <div class="role-option">
-                    <button type="button" class="role-btn role-btn-guide" id="here-as-guide">
-                        <span class="role-icon">👨‍🏫</span>
-                        <span class="role-text">Here as a Guide</span>
-                    </button>
-                </div>
-            </div>
+            <!-- Role selection moved to signup - removed from profile for clarity -->
 
             <!-- Student Guide Request Section (hidden by default) -->
             <div class="student-guide-section" id="student-guide-section" style="display: none;">
@@ -127,10 +120,15 @@
     <div class="guide-profile-layout tab-panel" id="guide-profile-layout" role="tabpanel" style="display: none;">
         <!-- Hero: banner + floating glass card + overlapping avatar + quick stats -->
         <section class="guide-hero" aria-label="Profile hero">
-            <div class="guide-hero-banner" data-parallax></div>
+            <div class="guide-hero-banner" id="guide-banner-img" data-parallax></div>
+            <button type="button" class="edit-banner-btn" id="edit-banner-btn" style="display: none;" title="Edit banner">📷 Edit Banner</button>
+            <input type="file" id="bannerUpload" hidden accept="image/*" />
+
             <div class="guide-hero-card glass-card">
                 <div class="guide-hero-avatar-wrap">
                     <div class="guide-hero-avatar" id="guide-avatar">U</div>
+                    <button type="button" class="edit-avatar-btn" id="edit-avatar-btn" style="display: none;" title="Change avatar">+</button>
+                    <input type="file" id="avatarUpload" hidden accept="image/*" />
                 </div>
                 <div class="guide-hero-body">
                     <div class="guide-hero-text">
@@ -147,7 +145,7 @@
                 <div class="guide-hero-actions">
                     <button type="button" class="btn-guide btn-guide-follow" id="btn-follow">Follow</button>
                     <button type="button" class="btn-guide btn-guide-dm" id="btn-dm">DM Me</button>
-                    <button type="button" class="btn-guide btn-guide-requests" id="btn-student-requests" title="Check requests">Student Request</button>
+                    <button type="button" class="btn-guide btn-guide-requests" id="btn-student-requests" title="Send request">Send Request</button>
                 </div>
             </div>
         </section>

@@ -1,12 +1,30 @@
 /* Profile page - load user data and render charts (multi-path support) */
 (function() {
-    const user = getFullUser();
+    // Check if viewing another user's profile
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewingProfileEmail = urlParams.get('profile');
+    
+    const currentUser = getFullUser();
+    const users = getUsers();
+    
+    let user = currentUser;
+
+    // If viewing another user, load their profile
+    if (viewingProfileEmail && currentUser) {
+        const viewedUser = users[decodeURIComponent(viewingProfileEmail)];
+        if (!viewedUser) {
+            alert('User not found');
+            window.location.href = 'profile.html';
+            return;
+        }
+        user = viewedUser;
+    }
 
     function redirectToLogin() {
         window.location.href = 'login.html';
     }
 
-    if (!user) {
+    if (!user || !currentUser) {
         redirectToLogin();
         return;
     }
@@ -20,7 +38,6 @@
             user.progressPerPath[path] = getDefaultProgress(i * 7 + path.length);
         }
     });
-    const users = getUsers();
     if (users[user.email]) {
         users[user.email].progressPerPath = user.progressPerPath;
         saveUsers(users);
@@ -87,6 +104,27 @@
     const studentProfileLayout = document.getElementById('panel-dashboard');
     const guideProfileLayout = document.getElementById('guide-profile-layout');
 
+    // If viewing another user's profile, hide edit sections and show "back" link
+    if (viewingProfileEmail) {
+        // Hide search and editable elements
+        const searchContainer = document.querySelector('.search-container');
+        if (searchContainer) {
+            searchContainer.style.display = 'none';
+        }
+        
+        // Hide account dropdown
+        const accountToggle = document.querySelector('.account-toggle-wrap');
+        if (accountToggle) {
+            accountToggle.style.display = 'none';
+        }
+        
+        // Add back link to header
+        const profileHeader = document.querySelector('.profile-header-bar h1');
+        if (profileHeader) {
+            profileHeader.innerHTML = `<a href="profile.html" style="color:inherit;text-decoration:none;cursor:pointer;">← Back to My Profile</a>`;
+        }
+    }
+
     // Check if user is already a guide
     const userRole = user.role || 'student';
     
@@ -127,10 +165,92 @@
         const initial = guideUser.name ? guideUser.name.charAt(0).toUpperCase() : 'G';
         document.getElementById('guide-avatar').textContent = initial;
         
+        // Load stored banner and avatar images
+        if (guideUser.bannerImage) {
+            const bannerEl = document.getElementById('guide-banner-img');
+            if (bannerEl) {
+                bannerEl.style.backgroundImage = `url(${guideUser.bannerImage})`;
+                bannerEl.style.backgroundSize = 'cover';
+                bannerEl.style.backgroundPosition = 'center';
+            }
+        }
+        if (guideUser.profileImage) {
+            const avatarEl = document.getElementById('guide-avatar');
+            if (avatarEl) {
+                avatarEl.textContent = '';
+                avatarEl.style.backgroundImage = `url(${guideUser.profileImage})`;
+                avatarEl.style.backgroundSize = 'cover';
+            }
+        }
+        
         // Set name and info
         document.getElementById('guide-profile-name').textContent = guideUser.name || 'Guide';
         document.getElementById('guide-headline').textContent = `${guideUser.guideExpertise || 'Expert'} in ${guideUser.guideDomain || 'Technology'}`;
         document.getElementById('guide-domain-text').textContent = guideUser.guideDomain || 'Not Set';
+        
+        // Show edit buttons only if viewing own profile
+        if (!viewingProfileEmail && guideUser.email === currentUser.email) {
+            const editBannerBtn = document.getElementById('edit-banner-btn');
+            const editAvatarBtn = document.getElementById('edit-avatar-btn');
+            if (editBannerBtn) editBannerBtn.style.display = 'inline-block';
+            if (editAvatarBtn) editAvatarBtn.style.display = 'flex';
+            
+            // Banner upload handler
+            editBannerBtn?.addEventListener('click', () => {
+                document.getElementById('bannerUpload').click();
+            });
+            
+            document.getElementById('bannerUpload')?.addEventListener('change', function(e) {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageData = event.target?.result;
+                    // Save to user object
+                    guideUser.bannerImage = imageData;
+                    users[guideUser.email] = guideUser;
+                    saveUsers(users);
+                    
+                    // Update UI
+                    const bannerEl = document.getElementById('guide-banner-img');
+                    if (bannerEl) {
+                        bannerEl.style.backgroundImage = `url(${imageData})`;
+                        bannerEl.style.backgroundSize = 'cover';
+                        bannerEl.style.backgroundPosition = 'center';
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // Avatar upload handler
+            editAvatarBtn?.addEventListener('click', () => {
+                document.getElementById('avatarUpload').click();
+            });
+            
+            document.getElementById('avatarUpload')?.addEventListener('change', function(e) {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageData = event.target?.result;
+                    // Save to user object
+                    guideUser.profileImage = imageData;
+                    users[guideUser.email] = guideUser;
+                    saveUsers(users);
+                    
+                    // Update UI
+                    const avatarEl = document.getElementById('guide-avatar');
+                    if (avatarEl) {
+                        avatarEl.textContent = '';
+                        avatarEl.style.backgroundImage = `url(${imageData})`;
+                        avatarEl.style.backgroundSize = 'cover';
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
         
         // Handle action buttons
         document.getElementById('btn-follow')?.addEventListener('click', function() {
@@ -142,7 +262,15 @@
         });
         
         document.getElementById('btn-student-requests')?.addEventListener('click', function() {
-            showGuideRequests();
+            // If viewing own profile and is a guide, show received requests
+            // If viewing another user's profile and is a student, show send request modal
+            if (!viewingProfileEmail) {
+                // Viewing own profile - show received requests (for guides)
+                showGuideRequests();
+            } else {
+                // Viewing another user's profile - show send request modal (for students)
+                showSendRequestModal(guideUser);
+            }
         });
         
         document.getElementById('btn-saved-posts')?.addEventListener('click', function() {
@@ -241,15 +369,19 @@
         });
     }
 
-    continueAsStudentBtn.addEventListener('click', function() {
-        // User continues as student - no action needed, just hide role selection
-        roleSelectionSection.style.display = 'none';
-    });
+    if (continueAsStudentBtn) {
+        continueAsStudentBtn.addEventListener('click', function() {
+            // User continues as student - hide role selection if present
+            if (roleSelectionSection) roleSelectionSection.style.display = 'none';
+        });
+    }
 
-    hereAsGuideBtn.addEventListener('click', function() {
-        // Redirect to guide signup page
-        window.location.href = 'guide-signup.html';
-    });
+    if (hereAsGuideBtn) {
+        hereAsGuideBtn.addEventListener('click', function() {
+            // Redirect to guide signup page
+            window.location.href = 'guide-signup.html';
+        });
+    }
 
     btnGuideRequests?.addEventListener('click', function() {
         // Show guide requests modal/page
@@ -775,6 +907,84 @@
         });
     }
 
+    /* Send Request Modal - Student sends request to Guide */
+    function showSendRequestModal(guideUser) {
+        // Check if student already sent a request
+        const requests = JSON.parse(localStorage.getItem('guide_requests') || '[]');
+        const existingRequest = requests.find(r => 
+            r.guideEmail === guideUser.email && r.studentEmail === currentUser.email
+        );
+        
+        if (existingRequest) {
+            alert('You have already sent a request to this guide.');
+            return;
+        }
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2>Send Request to ${escapeHtml(guideUser.name)}</h2>
+                    <button class="modal-close" type="button">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="request-domain">Domain (optional)</label>
+                        <input type="text" id="request-domain" placeholder="${escapeHtml(guideUser.guideDomain || 'e.g., React, JavaScript')}" style="width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                    </div>
+                    <div class="form-group">
+                        <label for="request-message">Message</label>
+                        <textarea id="request-message" placeholder="Tell ${escapeHtml(guideUser.name)} why you want their guidance..." rows="4" style="width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(255,255,255,0.05); color: var(--text-primary); resize: vertical;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn-cancel-request" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: transparent; color: var(--text-primary); cursor: pointer;">Cancel</button>
+                        <button type="button" class="btn-submit-request" style="padding: 8px 16px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan)); color: #010008; font-weight: 600; cursor: pointer;">Send Request</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Event handlers
+        modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+        modal.querySelector('.btn-cancel-request').addEventListener('click', () => modal.remove());
+        
+        modal.querySelector('.btn-submit-request').addEventListener('click', () => {
+            const domain = document.getElementById('request-domain').value || guideUser.guideDomain || 'General';
+            const message = document.getElementById('request-message').value.trim();
+            
+            if (!message) {
+                alert('Please write a message');
+                return;
+            }
+            
+            // Add request to localStorage
+            const request = {
+                guideEmail: guideUser.email,
+                guideName: guideUser.name,
+                studentEmail: currentUser.email,
+                studentName: currentUser.name,
+                domain: domain,
+                message: message,
+                timestamp: new Date().toISOString(),
+                status: 'pending'
+            };
+            
+            requests.push(request);
+            localStorage.setItem('guide_requests', JSON.stringify(requests));
+            
+            modal.remove();
+            alert('Request sent successfully!');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+
     /* Find Guides for Students */
     function showFindGuides() {
         // Get all guides from users
@@ -866,5 +1076,133 @@
                 alert(`Request sent to ${guideName}!`);
             });
         });
+    }
+
+    /* Global Search Functionality */
+    const searchInput = document.getElementById('global-search-input');
+    const searchBtn = document.getElementById('global-search-btn');
+    const searchResults = document.getElementById('search-results');
+
+    if (searchInput && searchBtn && searchResults) {
+        searchInput.addEventListener('keyup', debounce(performSearch, 300));
+        searchBtn.addEventListener('click', performSearch);
+        
+        // Close results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.add('hidden');
+            }
+        });
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function performSearch() {
+        const query = searchInput.value.trim();
+        if (!query || query.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+
+        searchResults.innerHTML = '<div class="search-result-empty">Searching...</div>';
+        searchResults.classList.remove('hidden');
+
+        // Search in local users (from auth.js localStorage)
+        const users = getUsers();
+        const results = [];
+
+        Object.values(users).forEach(u => {
+            if (u.name.toLowerCase().includes(query.toLowerCase())) {
+                results.push({
+                    email: u.email,
+                    name: u.name,
+                    role: u.role === 'guide' || u.role === 'mentor' ? 'mentor' : 'student',
+                    domain: u.guideDomain || ''
+                });
+            }
+        });
+
+        // Also try backend API if available
+        if (results.length === 0) {
+            searchBackend(query);
+        } else {
+            displaySearchResults(results);
+        }
+    }
+
+    function searchBackend(query) {
+        // Try mentors first
+        fetch(`/api/guider/search?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .catch(() => ({ data: [] }))
+            .then(res1 => {
+                const mentors = res1.data || [];
+                // Try students
+                fetch(`/api/student/search?q=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .catch(() => ({ data: [] }))
+                    .then(res2 => {
+                        const students = res2.data || [];
+                        const combined = [
+                            ...mentors.map(m => ({ ...m, role: 'mentor' })),
+                            ...students.map(s => ({ ...s, role: 'student' }))
+                        ];
+                        displaySearchResults(combined);
+                    });
+            });
+    }
+
+    function displaySearchResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-result-empty">No results found</div>';
+            return;
+        }
+
+        results.forEach(result => {
+            const item = document.createElement('div');
+            item.className = 'search-result-item';
+            item.role = 'option';
+            const initial = result.name.charAt(0).toUpperCase();
+            item.innerHTML = `
+                <div class="search-result-avatar">${escapeHtml(initial)}</div>
+                <div class="search-result-info">
+                    <div class="search-result-name">${escapeHtml(result.name)}</div>
+                    <div class="search-result-role">${result.role === 'mentor' ? '👨‍🏫 Mentor' : '🎓 Student'} ${result.domain ? '• ' + escapeHtml(result.domain) : ''}</div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                // Navigate to user profile
+                if (result.email === currentUser.email) {
+                    // Current user, just close
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                } else {
+                    // Navigate to this user's profile
+                    showUserProfile(result);
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                }
+            });
+
+            searchResults.appendChild(item);
+        });
+    }
+
+    function showUserProfile(userInfo) {
+        // Navigate to this user's profile by email
+        window.location.href = 'profile.html?profile=' + encodeURIComponent(userInfo.email);
     }
 })();

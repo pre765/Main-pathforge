@@ -1,43 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Roadmaps | Learning Paths</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML Basics | Roadmap</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/design-system.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/roadmap-page.css">
 </head>
-<body class="profile-page roadmap-page">
+<body class="roadmap-page">
     <div id="canvas-3d"></div>
-    <div class="profile-header-bar">
-        <h1>Your Roadmaps</h1>
-        <div class="header-actions">
-            <a href="profile.html" class="choose-path-btn">← Dashboard</a>
-        </div>
+
+    <div id="parallax-bg" aria-hidden="true"></div>
+
+    <div class="roadmap-wrapper">
+        <header class="roadmap-header">
+            <h1 class="page-title">HTML Basics</h1>
+        </header>
+
+        <main class="roadmap-main" role="main">
+            <div id="roadmap" class="roadmap-vertical" aria-label="Skill tree roadmap">
+                <!-- Nodes will be rendered here by js/roadmap-page.js -->
+            </div>
+        </main>
     </div>
 
-    <main class="roadmap-page-main">
-        <section class="mini-roadmap-wrap" aria-label="Recommended learning order">
-            <h2 class="mini-roadmap-title">Suggested path order</h2>
-            <p class="mini-roadmap-desc">Follow this order for a smoother learning journey. Start with the first path, then move to the next.</p>
-            <div class="mini-roadmap-horizontal" id="mini-roadmap">
-                <!-- Injected by roadmap-page.js -->
-            </div>
-        </section>
+    <div class="node-modal hidden" id="node-modal" role="dialog" aria-hidden="true" aria-labelledby="modal-title">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-card" role="document">
+            <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+            <h3 id="modal-title">Module</h3>
+            <p id="modal-desc" class="muted">Complete the checklist to unlock the next module.</p>
 
-        <section class="full-roadmaps-wrap">
-            <h2 class="full-roadmaps-title">Full roadmaps for your paths</h2>
-            <div class="roadmap-container" id="roadmap-container">
-                <!-- Injected by roadmap-page.js -->
+            <div class="modal-body">
+                <div class="modal-progress" id="modal-progress" aria-hidden="true">
+                    <div class="progress-bar"><div class="progress-fill" id="modal-progress-fill" style="width:0%"></div></div>
+                    <div class="progress-text" id="modal-progress-text">0%</div>
+                </div>
+
+                <ul class="todo-list" id="modal-todo-list" aria-live="polite"></ul>
             </div>
-        </section>
-    </main>
+
+            <div class="modal-actions">
+                <button class="continue-btn" id="continue-btn">CONTINUE</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
     <script src="js/three-scene.js"></script>

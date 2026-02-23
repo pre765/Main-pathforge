@@ -16,7 +16,7 @@ function saveUsers(users) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
 }
 
-function signUp(name, email, password) {
+function signUp(name, email, password, bio) {
     const users = getUsers();
     const key = email.toLowerCase().trim();
     if (users[key]) return false;
@@ -26,6 +26,7 @@ function signUp(name, email, password) {
         email: key,
         password: password,
         role: 'student',
+        bio: bio || '',
         joinedAt: new Date().toISOString(),
         progress: getDefaultProgress(),
     };

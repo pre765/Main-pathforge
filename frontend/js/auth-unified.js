@@ -44,13 +44,33 @@
   tabCreate.addEventListener('click', () => showPanel('create'));
 
   /* ----- Role selector ----- */
+  const domainInput = document.getElementById('create-domain');
+  const expertiseInput = document.getElementById('create-expertise');
+  const yearsInput = document.getElementById('create-years');
+
+  function toggleMentorFields(isMentor) {
+    if (isMentor) {
+      mentorFields.classList.remove('hidden');
+      mentorFields.classList.add('visible');
+      domainInput?.setAttribute('required', 'required');
+      expertiseInput?.setAttribute('required', 'required');
+      yearsInput?.setAttribute('required', 'required');
+    } else {
+      mentorFields.classList.remove('visible');
+      mentorFields.classList.add('hidden');
+      domainInput?.removeAttribute('required');
+      expertiseInput?.removeAttribute('required');
+      yearsInput?.removeAttribute('required');
+    }
+  }
+
   rolePills.forEach((pill) => {
     pill.addEventListener('click', function () {
       rolePills.forEach((p) => p.classList.remove('active'));
       this.classList.add('active');
       const role = this.dataset.role;
       createRoleInput.value = role;
-      mentorFields.hidden = role !== 'mentor';
+      toggleMentorFields(role === 'mentor');
     });
   });
 
@@ -112,13 +132,7 @@
       alert('Invalid email or password.');
       return;
     }
-    const user = getFullUser();
-    const role = user && (user.role === 'guide' || user.role === 'mentor') ? 'mentor' : 'student';
-    if (role === 'mentor') {
-      window.location.href = 'profile.html';
-    } else {
-      window.location.href = 'path-select.html';
-    }
+    window.location.href = 'profile.html';
   });
 
   /* ----- Create Account ----- */
@@ -127,19 +141,19 @@
     const name = document.getElementById('create-name').value.trim();
     const email = document.getElementById('create-email').value.trim();
     const password = document.getElementById('create-password').value;
+    const bio = document.getElementById('create-bio').value.trim();
     const role = createRoleInput.value;
 
     if (role === 'mentor') {
       const domain = document.getElementById('create-domain').value;
       const expertise = document.getElementById('create-expertise').value;
-      const bio = document.getElementById('create-bio').value.trim();
       const years = document.getElementById('create-years').value;
       if (!signUpMentor(name, email, password, { domain, expertise, bio, years })) {
         alert('This email is already registered. Please sign in instead.');
         return;
       }
     } else {
-      if (!signUp(name, email, password)) {
+      if (!signUp(name, email, password, bio)) {
         alert('This email is already registered. Please sign in instead.');
         return;
       }

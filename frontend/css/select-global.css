@@ -23,6 +23,13 @@ select {
     padding-right: 2.5rem;
 }
 
+/* Prevent pseudo-element artifacts on select elements */
+select::before,
+select::after {
+    display: none !important;
+    content: none !important;
+}
+
 /* Select option styling */
 select option {
     background-color: #111827;
@@ -81,6 +88,13 @@ select {
     padding-right: 2.5rem;
 }
 
+/* Prevent pseudo-element artifacts on input-wrap select */
+.input-wrap select::before,
+.input-wrap select::after {
+    display: none !important;
+    content: none !important;
+}
+
 .input-wrap select option {
     background-color: #111827 !important;
     color: white !important;
@@ -109,6 +123,13 @@ select {
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     padding-right: 2.5rem;
+}
+
+/* Prevent pseudo-element artifacts on select-group select */
+.select-group select::before,
+.select-group select::after {
+    display: none !important;
+    content: none !important;
 }
 
 .select-group select option {

@@ -100,8 +100,14 @@
             <span class="password-strength-label" id="password-strength-label">Password strength</span>
           </div>
 
+          <!-- Bio field for all users -->
+          <div class="input-wrap floating">
+            <textarea id="create-bio" rows="3" placeholder=" "></textarea>
+            <label for="create-bio">Bio (optional)</label>
+          </div>
+
           <!-- Mentor-only fields -->
-          <div class="mentor-fields" id="mentor-fields" hidden>
+          <div class="mentor-fields hidden" id="mentor-fields">
             <div class="input-wrap floating">
               <select id="create-domain" aria-label="Domain">
                 <option value="">Select domain</option>
@@ -123,10 +129,6 @@
                 <option value="Expert">Expert</option>
               </select>
               <label for="create-expertise">Expertise level</label>
-            </div>
-            <div class="input-wrap floating">
-              <textarea id="create-bio" rows="3" placeholder=" "></textarea>
-              <label for="create-bio">Bio</label>
             </div>
             <div class="input-wrap floating">
               <input type="number" id="create-years" min="0" max="50" placeholder=" " aria-label="Years of experience">
