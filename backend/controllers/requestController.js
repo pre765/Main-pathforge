@@ -1,15 +1,31 @@
 const Request = require("../models/Request");
+const User = require("../models/User");
 
-
-// ✅ Send Request (Student → Guider)
+// ✅ Send Request (Search guider by name or domain)
 exports.sendRequest = async (req, res) => {
   try {
-    const { studentId, guiderId } = req.body;
+    const { studentId, guiderName, domain } = req.body;
 
-    // Prevent duplicate requests
+    // 🔍 Find guider by name or domain & role = guider
+    const guider = await User.findOne({
+      role: "guider",
+      $or: [
+        { name: guiderName },
+        { domain: domain }
+      ]
+    });
+
+    if (!guider) {
+      return res.status(404).json({
+        success: false,
+        message: "Guider not found"
+      });
+    }
+
+    // 🚫 Prevent duplicate request
     const existing = await Request.findOne({
       student: studentId,
-      guider: guiderId
+      guider: guider._id
     });
 
     if (existing) {
@@ -19,9 +35,10 @@ exports.sendRequest = async (req, res) => {
       });
     }
 
+    // ✅ Create request
     const request = await Request.create({
       student: studentId,
-      guider: guiderId
+      guider: guider._id
     });
 
     res.status(201).json({
@@ -39,7 +56,7 @@ exports.sendRequest = async (req, res) => {
 };
 
 
-// ✅ Guider Accept Request
+// ✅ Accept Request
 exports.acceptRequest = async (req, res) => {
   try {
     const { requestId } = req.body;
@@ -72,14 +89,14 @@ exports.acceptRequest = async (req, res) => {
 };
 
 
-// ✅ View Requests for Specific Guider
+// ✅ View Requests for Guider
 exports.getGuiderRequests = async (req, res) => {
   try {
     const { guiderId } = req.params;
 
     const requests = await Request.find({ guider: guiderId })
       .populate("student", "name email")
-      .populate("guider", "name email");
+      .populate("guider", "name email domain");
 
     res.status(200).json({
       success: true,
