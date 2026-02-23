@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | PathForge</title>
+    <script>
+        // Redirect to unified auth page
+        window.location.replace('auth.html?tab=create&role=mentor');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <p>Redirecting to <a href="auth.html?tab=create&role=mentor">Create Account</a>…</p>
+    <div id="canvas-3d"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+    <script src="js/three-scene.js"></script>
+</body>
+</html>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Cyber Security">Cyber Security</option>
+                        <option value="Cloud Computing">Cloud Computing</option>
+                        <option value="Product & Design">Product & Design</option>
+                    </select>
+                    <label for="guide-domain">Domain</label>
+                    <span class="input-highlight"></span>
+                </div>
+                <div class="input-group">
+                    <select id="guide-expertise" required>
+                        <option value="">Select Expertise Level</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                    <label for="guide-expertise">Expertise Level</label>
+                    <span class="input-highlight"></span>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span>Register as Guide</span>
+                    <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </form>
+            <p class="form-footer">
+                Already registered? <a href="login.html">Log In</a><br>
+                <a href="profile.html" style="margin-top: 0.5rem; display: inline-block;">← Back to Profile</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Style select elements to match input styling
+        document.querySelectorAll('select').forEach(select => {
+            select.style.cssText = `
+                width: 100%;
+                padding: 1rem 0.75rem;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                color: var(--text-primary);
+                font-size: 1rem;
+                font-family: inherit;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            `;
+            select.addEventListener('focus', function() {
+                this.style.borderColor = 'rgba(0, 255, 136, 0.5)';
+                this.style.background = 'rgba(255, 255, 255, 0.08)';
+            });
+            select.addEventListener('blur', function() {
+                this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                this.style.background = 'rgba(255, 255, 255, 0.05)';
+            });
+        });
+
+        document.getElementById('guide-signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('guide-name').value.trim();
+            const email = document.getElementById('guide-email').value.trim();
+            const password = document.getElementById('guide-password').value;
+            const role = document.getElementById('guide-role').value;
+            const domain = document.getElementById('guide-domain').value;
+            const expertise = document.getElementById('guide-expertise').value;
+
+            if (!name || !email || !password || !role || !domain || !expertise) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Get current user or create new guide account
+            const users = getUsers();
+            const key = email.toLowerCase().trim();
+            
+            // Check if email already exists
+            if (users[key]) {
+                // Update existing user to guide
+                users[key].role = role === 'mentor' ? 'guide' : 'student';
+                users[key].guideDomain = domain;
+                users[key].guideExpertise = expertise;
+            } else {
+                // Create new guide account
+                users[key] = {
+                    name: name.trim(),
+                    email: key,
+                    password: password,
+                    role: role === 'mentor' ? 'guide' : 'student',
+                    guideDomain: domain,
+                    guideExpertise: expertise,
+                    joinedAt: new Date().toISOString(),
+                    progress: getDefaultProgress(),
+                };
+            }
+            
+            saveUsers(users);
+
+            // Set session
+            const session = { email: key, name: users[key].name };
+            localStorage.setItem('auth_portal_session', JSON.stringify(session));
+
+            alert('Guide registration successful!');
+            window.location.href = 'profile.html';
+        });
+    </script>
+</body>
+</html>

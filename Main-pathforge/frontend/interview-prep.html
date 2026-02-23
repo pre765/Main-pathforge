@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Prep | Resume Builder & ATS Checker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/interview-prep.css">
+    <link rel="stylesheet" href="css/interview-prep-enhancements.css">
+    <link rel="stylesheet" href="css/resume-dashboard.css">
+    <link rel="stylesheet" href="css/select-global.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="profile-page interview-prep-page">
+    <div id="canvas-3d"></div>
+    <div class="profile-header-bar">
+        <h1>Interview Prep</h1>
+        <div class="header-actions">
+            <a href="profile.html" class="choose-path-btn">← Dashboard</a>
+        </div>
+    </div>
+
+    <main class="interview-prep-main">
+        <aside class="interview-prep-sidebar">
+            <nav class="prep-nav">
+                <button class="prep-nav-item active" data-section="build-resume">Build Resume</button>
+                <button class="prep-nav-item" data-section="check-resume">Check Resume</button>
+                <button class="prep-nav-item" data-section="mock-interview">Mock Interview</button>
+            </nav>
+        </aside>
+
+        <div class="interview-prep-content">
+            <!-- Build Resume Section -->
+            <section class="prep-section active" id="section-build-resume">
+                <div class="resume-builder-container">
+                    <div class="resume-chat-container">
+                        <h2>Resume Builder</h2>
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-message bot">
+                                <div class="message-content">
+                                    <p>Welcome! I'll help you build a professional resume. Let's start by gathering some information.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-form-container" id="chat-form-container">
+                            <form class="resume-chat-form" id="resume-chat-form">
+                                <div class="form-step active" id="step-skills">
+                                    <h3>What are your skills?</h3>
+                                    <textarea id="input-skills" placeholder="e.g., JavaScript, React, Node.js, Python, Machine Learning..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('skills')">Next</button>
+                                </div>
+                                <div class="form-step" id="step-projects">
+                                    <h3>Tell me about your projects</h3>
+                                    <textarea id="input-projects" placeholder="Describe your projects, technologies used, and achievements..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('projects')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('projects')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-experience">
+                                    <h3>What's your experience level?</h3>
+                                    <textarea id="input-experience" placeholder="Describe your experience level (e.g., 2 years in web development, internship experience, etc.)..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('experience')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('experience')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-job-desc">
+                                    <h3>Paste the job description</h3>
+                                    <textarea id="input-job-desc" placeholder="Paste the full job description here..." required></textarea>
+                                    <button type="button" class="btn-next" onclick="nextStep('job-desc')">Next</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('job-desc')">Back</button>
+                                </div>
+                                <div class="form-step" id="step-past-jobs">
+                                    <h3>Previous job experience (Optional)</h3>
+                                    <textarea id="input-past-jobs" placeholder="List your previous work experience, if any..."></textarea>
+                                    <button type="button" class="btn-submit" onclick="generateResume()">Generate Resume</button>
+                                    <button type="button" class="btn-back" onclick="prevStep('past-jobs')">Back</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="resume-preview-container">
+                        <h2>Resume Preview</h2>
+                        <div class="resume-preview" id="resume-preview">
+                            <div class="resume-placeholder">
+                                <p>Complete the form to see your resume preview</p>
+                            </div>
+                        </div>
+                        <div class="resume-suggestions" id="resume-suggestions" style="display: none;">
+                            <h3>Suggestions</h3>
+                            <div class="suggestions-content" id="suggestions-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Check Resume Section - Resume Intelligence Engine -->
+            <section class="prep-section" id="section-check-resume">
+                <div class="resume-intelligence-wrap">
+                    <!-- 1. HERO INPUT SECTION -->
+                    <section class="hero-input-section card-section">
+                        <h2 class="hero-title">Resume Intelligence Engine</h2>
+                        <p class="hero-subtitle">Analyze your job readiness instantly</p>
+                        
+                        <!-- Upload Method Tabs -->
+                        <div class="upload-method-tabs">
+                            <button type="button" class="upload-method-tab active" data-method="paste">Paste Text</button>
+                            <button type="button" class="upload-method-tab" data-method="upload">Upload File</button>
+                        </div>
+
+                        <!-- Paste Method (Default) -->
+                        <div class="input-row" id="paste-method">
+                            <div class="input-group-hero">
+                                <label for="resume-text">Resume</label>
+                                <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
+                            </div>
+                            <div class="input-group-hero">
+                                <label for="jd-text">Job Description</label>
+                                <textarea id="jd-text" placeholder="Paste the job description here..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Upload Method (Hidden by default) -->
+                        <div id="upload-method" style="display: none;">
+                            <div class="input-group-hero">
+                                <label>Upload Resume (PDF, DOCX, or TXT)</label>
+                                <div class="upload-zone" id="resume-upload-zone">
+                                    <div class="upload-icon">📄</div>
+                                    <div class="upload-zone-text">Drag your resume here</div>
+                                    <div class="upload-zone-hint">or click to browse</div>
+                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+                                </div>
+                            </div>
+                            <div class="input-group-hero">
+                                <label>Upload Job Description (Optional)</label>
+                                <div class="upload-zone" id="jd-upload-zone">
+                                    <div class="upload-icon">📋</div>
+                                    <div class="upload-zone-text">Drag job description here</div>
+                                    <div class="upload-zone-hint">or click to browse</div>
+                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Job Role & Experience Selectors -->
+                        <div class="filter-row">
+                            <div class="select-group">
+                                <label for="job-role-select">Target Job Role (Optional)</label>
+                                <select id="job-role-select">
+                                    <option value="">Select a role...</option>
+                                    <option value="frontend">Frontend Engineer</option>
+                                    <option value="backend">Backend Engineer</option>
+                                    <option value="fullstack">Full Stack Engineer</option>
+                                    <option value="data">Data Engineer</option>
+                                    <option value="ml">ML Engineer</option>
+                                    <option value="devops">DevOps Engineer</option>
+                                </select>
+                            </div>
+                            <div class="select-group">
+                                <label for="experience-level-select">Your Experience Level</label>
+                                <select id="experience-level-select">
+                                    <option value="">Select level...</option>
+                                    <option value="entry">Entry Level (0-2 years)</option>
+                                    <option value="junior">Junior (2-5 years)</option>
+                                    <option value="mid">Mid-Level (5-10 years)</option>
+                                    <option value="senior">Senior (10+ years)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="analyze-wrap">
+                            <button type="button" class="btn-analyze" id="btn-analyze">
+                                <span class="btn-text">Analyze</span>
+                                <span class="btn-spinner" id="analyze-spinner" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Results container (shown after analysis) -->
+                    <div class="results-container" id="results-container" hidden>
+                        <!-- 2. SCORE OVERVIEW CARD -->
+                        <section class="score-overview-card card-section">
+                            <!-- ATS Score Circle Visualization -->
+                            <div class="ats-score-visual">
+                                <div class="score-circle-wrap">
+                                    <svg class="score-circle-svg" viewBox="0 0 100 100">
+                                        <defs>
+                                            <linearGradient id="scoreGradient">
+                                                <stop offset="0%" style="stop-color:var(--accent-green);stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:var(--accent-cyan);stop-opacity:1" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="score-circle-bg" cx="50" cy="50" r="45"></circle>
+                                        <circle class="score-circle-fill" id="score-circle-fill" cx="50" cy="50" r="45" style="stroke-dasharray: 282.7; stroke-dashoffset: 282.7;"></circle>
+                                    </svg>
+                                    <div class="score-circle-text">
+                                        <span class="score-number" id="score-big-new">78</span>
+                                        <span class="score-label">Match %</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Keyword Match & Readiness -->
+                            <div class="keyword-match-wrap">
+                                <div class="keyword-match-icon">🎯</div>
+                                <div class="keyword-match-content">
+                                    <div class="keyword-match-label">Keyword Match</div>
+                                    <div class="keyword-match-value" id="keyword-match-value">68%</div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <div class="readiness-badge" id="readiness-badge">Strong Candidate</div>
+                                <p class="score-explanation" id="score-explanation">You meet most required skills but lack some preferred tools.</p>
+                            </div>
+                        </section>
+
+                        <!-- 3. ANALYSIS BREAKDOWN (4 cards) -->
+                        <section class="analysis-breakdown card-section">
+                            <h3 class="section-heading">Analysis Breakdown</h3>
+                            <div class="breakdown-grid" id="breakdown-grid">
+                                <div class="breakdown-card" data-card="skills">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Skills Match</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Missing Docker</li>
+                                        <li>Missing AWS</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example fix</summary>
+                                        <p>"Containerized ML model using Docker; deployed on AWS ECS."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="experience">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Experience Strength</span>
+                                        <span class="status-badge status-good">Good</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Years of experience clearly stated</li>
+                                        <li>Consider adding company names</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>"Senior Developer at TechCorp (2020–present). Led team of 4."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="impact">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Impact &amp; Metrics</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Add quantified metrics (%, time, scale)</li>
+                                        <li>Use action verbs (Led, Reduced, Increased)</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>"Reduced API latency by 40%; improved test coverage to 90%."</p>
+                                    </details>
+                                </div>
+                                <div class="breakdown-card" data-card="branding">
+                                    <div class="breakdown-card-header">
+                                        <span class="breakdown-title">Professional Branding</span>
+                                        <span class="status-badge status-needs">Needs Improvement</span>
+                                    </div>
+                                    <ul class="breakdown-bullets">
+                                        <li>Add LinkedIn profile link</li>
+                                        <li>Ensure consistent formatting</li>
+                                    </ul>
+                                    <details class="example-rewrite">
+                                        <summary>Example rewrite</summary>
+                                        <p>Add a one-line professional headline and LinkedIn URL in the header.</p>
+                                    </details>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 4. IMMEDIATE ACTION CHECKLIST -->
+                        <section class="action-checklist card-section">
+                            <h3 class="section-heading">Immediate Fix Checklist</h3>
+                            
+                            <!-- Skills Gap -->
+                            <div class="skills-gap-section">
+                                <div class="skills-gap-title">Missing Skills</div>
+                                <div class="skills-gap-list" id="skills-gap-list">
+                                    <span class="skill-gap-badge">Docker</span>
+                                    <span class="skill-gap-badge">AWS</span>
+                                </div>
+                            </div>
+
+                            <!-- Checklist Items -->
+                            <div class="checklist-box" id="action-checklist">
+                                <label class="checklist-item"><input type="checkbox"> <span>Add Docker project</span></label>
+                                <label class="checklist-item"><input type="checkbox"> <span>Add quantified metrics</span></label>
+                                <label class="checklist-item"><input type="checkbox"> <span>Add LinkedIn profile link</span></label>
+                            </div>
+                        </section>
+                                <label class="checklist-item"><input type="checkbox"> <span>Add LinkedIn profile link</span></label>
+                            </div>
+                        </section>
+
+                        <!-- 5. ROADMAP RECOMMENDATIONS -->
+                        <section class="roadmap-recommendations card-section">
+                            <h3 class="section-heading">Recommended Learning Path</h3>
+                            <div class="roadmap-modules" id="roadmap-modules">
+                                <a href="roadmap.html" class="module-card">DevOps → Docker Fundamentals</a>
+                                <a href="roadmap.html" class="module-card">Cloud → AWS Basics</a>
+                            </div>
+                            <div style="margin-top: 1.5rem; text-align: center;">
+                                <button type="button" class="btn-download-resume" id="btn-download-improved">Download Improved Resume</button>
+                            </div>
+                        </section>
+
+                        <!-- 6. INTERVIEW QUESTIONS -->
+                        <section class="interview-questions-section card-section">
+                            <h3 class="section-heading">Interview Questions</h3>
+                            <div class="iq-tabs">
+                                <button type="button" class="iq-tab active" data-iq="technical">Technical</button>
+                                <button type="button" class="iq-tab" data-iq="behavioral">Behavioral</button>
+                                <button type="button" class="iq-tab" data-iq="project">Project-based</button>
+                            </div>
+                            <div class="iq-panels">
+                                <div class="iq-panel active" id="iq-technical">
+                                    <ul class="iq-list" id="iq-list-technical"></ul>
+                                </div>
+                                <div class="iq-panel" id="iq-behavioral">
+                                    <ul class="iq-list" id="iq-list-behavioral"></ul>
+                                </div>
+                                <div class="iq-panel" id="iq-project">
+                                    <ul class="iq-list" id="iq-list-project"></ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- 7. PROFESSIONAL SUMMARY SUGGESTION -->
+                        <section class="summary-suggestion card-section">
+                            <h3 class="section-heading">Suggested Professional Summary</h3>
+                            <div class="summary-box">
+                                <p class="summary-text" id="summary-text">Machine Learning Engineer with 3 years of experience building production ML systems. Strong in Python, TensorFlow, and cloud deployment. Led model improvements that increased accuracy by 15%.</p>
+                                <button type="button" class="btn-copy-summary" id="btn-copy-summary">Copy</button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mock Interview Section -->
+            <section class="prep-section" id="section-mock-interview">
+                <div class="mock-interview-container">
+                    <h2>Mock Interview</h2>
+                    <div class="mock-interview-placeholder">
+                        <p>Mock interview feature coming soon!</p>
+                        <p class="placeholder-desc">Practice your interview skills with AI-powered mock interviews.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+    <script src="js/three-scene.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/interview-prep-enhancements.js"></script>
+    <script src="js/interview-prep.js"></script>
+</body>
+</html>
