@@ -1,0 +1,421 @@
+/* ========== DRAG & DROP UPLOAD ZONE ========== */
+.upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 180px;
+    padding: 2rem;
+    background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.05), transparent);
+    border: 2px dashed rgba(0, 255, 136, 0.3);
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: rgba(0, 255, 136, 0.6);
+    background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.08), transparent);
+}
+
+.upload-zone.drag-over {
+    border-color: var(--accent-green);
+    background: radial-gradient(ellipse at center, rgba(0, 255, 136, 0.12), transparent);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.upload-zone-text {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.upload-zone-hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.upload-input-hidden {
+    display: none;
+}
+
+/* ========== TAB TOGGLE: UPLOAD VS PASTE ========== */
+.upload-method-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.upload-method-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.upload-method-tab:hover {
+    color: var(--text-primary);
+}
+
+.upload-method-tab.active {
+    border-bottom-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+/* ========== JOB ROLE & EXPERIENCE SELECTORS ========== */
+.filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 700px) {
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.select-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.select-group select {
+    padding: 0.75rem 1rem;
+    background: #111827;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.select-group select option {
+    background-color: #111827;
+    color: white;
+}
+
+.select-group select:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+}
+
+/* ========== ATS SCORE CARD (Circular Progress) ========== */
+.ats-score-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.score-circle-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-circle-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.score-circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 8;
+}
+
+.score-circle-fill {
+    fill: none;
+    stroke: url(#scoreGradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-circle-text {
+    position: absolute;
+    text-align: center;
+}
+
+.score-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ========== KEYWORD MATCH PERCENTAGE ========== */
+.keyword-match-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.keyword-match-icon {
+    font-size: 1.5rem;
+}
+
+.keyword-match-content {
+    flex: 1;
+}
+
+.keyword-match-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.keyword-match-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+/* ========== SKILLS GAP LIST ========== */
+.skills-gap-section {
+    margin-bottom: 1.5rem;
+}
+
+.skills-gap-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.skills-gap-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-gap-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 170, 0, 0.15);
+    border: 1px solid rgba(255, 170, 0, 0.3);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #ffaa00;
+    font-weight: 500;
+}
+
+.skill-gap-badge::before {
+    content: '⚠';
+    font-size: 0.9rem;
+}
+
+/* ========== SUGGESTIONS ACCORDION ========== */
+.suggestions-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.accordion-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.accordion-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.accordion-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-body {
+    display: none;
+    padding: 0 1rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.accordion-header.active ~ .accordion-body {
+    display: block;
+}
+
+/* ========== DOWNLOAD BUTTON ========== */
+.btn-download-resume {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+    border: none;
+    border-radius: 12px;
+    color: #010008;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-download-resume:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+}
+
+.btn-download-resume::before {
+    content: '⬇';
+    font-size: 1rem;
+}
+
+/* ========== MICRO-INTERACTIONS: LOADING & PROGRESS ========== */
+.loading-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.progress-bar-animated {
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-animated::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: slideProgress 1.5s infinite;
+}
+
+@keyframes slideProgress {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ========== RESPONSIVE IMPROVEMENTS ========== */
+@media (max-width: 900px) {
+    .hero-input-section {
+        padding: 1.5rem;
+    }
+
+    .ats-score-visual {
+        margin-bottom: 1rem;
+    }
+
+    .score-circle-wrap {
+        width: 140px;
+        height: 140px;
+    }
+
+    .score-number {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .upload-zone {
+        padding: 1.5rem 1rem;
+        min-height: 150px;
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+    }
+
+    .score-circle-wrap {
+        width: 120px;
+        height: 120px;
+    }
+
+    .score-number {
+        font-size: 1.75rem;
+    }
+}
