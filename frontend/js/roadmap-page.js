@@ -93,6 +93,25 @@
             const button = document.createElement('div');
             button.className = 'roadmap-step-button';
             button.setAttribute('title', lesson.title);
+            // 3D tilt interaction
+            button.style.setProperty('--rx', '0deg');
+            button.style.setProperty('--ry', '0deg');
+            button.style.setProperty('--lift', '0px');
+            button.addEventListener('pointermove', (e) => {
+                const rect = button.getBoundingClientRect();
+                const px = (e.clientX - rect.left) / rect.width - 0.5; // -0.5..0.5
+                const py = (e.clientY - rect.top) / rect.height - 0.5;
+                const rx = (-py * 10).toFixed(2);
+                const ry = (px * 14).toFixed(2);
+                button.style.setProperty('--rx', `${rx}deg`);
+                button.style.setProperty('--ry', `${ry}deg`);
+                button.style.setProperty('--lift', '-2px');
+            });
+            button.addEventListener('pointerleave', () => {
+                button.style.setProperty('--rx', '0deg');
+                button.style.setProperty('--ry', '0deg');
+                button.style.setProperty('--lift', '0px');
+            });
 
             const icon = document.createElement('span');
             icon.className = 'roadmap-step-icon';
