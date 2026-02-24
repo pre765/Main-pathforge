@@ -40,6 +40,7 @@
         }
     } catch(e){}
 
+    const roadmapIcons = ['🤖', '📊', '🧠', '🛠️', '🚀', '🎯', '💡', '📚'];
     let activeIndex = 0;
     const completed = new Set();
 
@@ -56,6 +57,20 @@
     const modalClose = document.getElementById('modal-close');
     const modalBackdrop = document.getElementById('modal-backdrop');
 
+    // helper to resolve topics for a given module index based on current domain/path
+    function getModuleTopicsForIndex(index){
+        const moduleNumber = index + 1;
+        const pathKey = localStorage.getItem('selectedPath') || pathName;
+        const fromMap = window.roadmapTopics
+            && window.roadmapTopics[pathKey]
+            && window.roadmapTopics[pathKey][String(moduleNumber)];
+        const fromPhase = (phases[index] && phases[index].subSteps) || [];
+        return {
+            pathKey,
+            topics: Array.isArray(fromMap) && fromMap.length ? fromMap : fromPhase
+        };
+    }
+
     // init
     requestAnimationFrame(()=>{
         document.querySelector('.roadmap-wrapper').classList.add('visible');
@@ -70,21 +85,76 @@
 
         lessons.forEach((lesson, i)=>{
             const node = document.createElement('div');
-            node.className = 'roadmap-node';
+            node.className = 'roadmap-node roadmap-step';
             if(i === activeIndex) node.classList.add('active');
             else if(completed.has(lesson.id)) node.classList.add('completed');
             else node.classList.add('locked');
 
-            const inner = document.createElement('div');
-            inner.className = 'node-inner';
+            const button = document.createElement('div');
+            button.className = 'roadmap-step-button';
+            button.setAttribute('title', lesson.title);
 
-            const counter = document.createElement('div');
-            counter.className = 'node-counter';
-            counter.textContent = i+1;
+            const icon = document.createElement('span');
+            icon.className = 'roadmap-step-icon';
+            icon.textContent = roadmapIcons[i % roadmapIcons.length];
+            button.appendChild(icon);
 
-            inner.appendChild(counter);
-            inner.setAttribute('title', lesson.title);
-            node.appendChild(inner);
+            if (i === activeIndex) {
+                const aura = document.createElement('div');
+                aura.className = 'roadmap-step-aura';
+                button.appendChild(aura);
+            }
+
+            const label = document.createElement('div');
+            label.className = 'roadmap-step-label';
+            const labelText = document.createElement('span');
+            labelText.className = 'roadmap-step-title';
+            labelText.textContent = lesson.title;
+            label.appendChild(labelText);
+
+            node.appendChild(button);
+            node.appendChild(label);
+
+            // hover tooltip showing concepts for this stage (Duolingo-like)
+            const tooltipMeta = getModuleTopicsForIndex(i);
+            const tooltip = document.createElement('div');
+            tooltip.className = 'roadmap-stage-tooltip';
+            const tooltipId = `roadmap-stage-tooltip-${i}`;
+            tooltip.id = tooltipId;
+
+            const ttTitle = document.createElement('div');
+            ttTitle.className = 'roadmap-stage-tooltip-title';
+            ttTitle.textContent = `Stage ${i+1}: ${lesson.title}`;
+            tooltip.appendChild(ttTitle);
+
+            const topics = tooltipMeta.topics || [];
+            if (topics.length) {
+                const list = document.createElement('ul');
+                list.className = 'roadmap-stage-tooltip-list';
+                topics.forEach(t => {
+                    const li = document.createElement('li');
+                    li.textContent = t;
+                    list.appendChild(li);
+                });
+                tooltip.appendChild(list);
+            } else {
+                const empty = document.createElement('div');
+                empty.className = 'roadmap-stage-tooltip-empty';
+                empty.textContent = 'Concepts coming soon.';
+                tooltip.appendChild(empty);
+            }
+
+            button.appendChild(tooltip);
+            button.setAttribute('aria-describedby', tooltipId);
+
+            if (i < lessons.length - 1) {
+                const connector = document.createElement('div');
+                connector.className = 'roadmap-step-connector';
+                if (completed.has(lesson.id)) {
+                    connector.classList.add('unlocked');
+                }
+                node.appendChild(connector);
+            }
 
             // store data-index for drag logic
             node.dataset.index = i;
@@ -105,68 +175,17 @@
         });
 
         container.appendChild(frag);
-
-        // draw connectors once nodes are present
-        requestAnimationFrame(drawConnectors);
-
-        // draw connectors once nodes are present
         requestAnimationFrame(drawConnectors);
     }
 
     function drawConnectors(){
-        // Remove existing svg if any
-        const prev = container.querySelector('.connectors-svg');
-        if(prev) prev.remove();
-
-        const svgNS = 'http://www.w3.org/2000/svg';
-        const svg = document.createElementNS(svgNS,'svg');
-        svg.classList.add('connectors-svg');
-        svg.setAttribute('width','200');
-        svg.style.left = '50%';
-        svg.style.transform = 'translateX(-50%)';
-
         const nodes = Array.from(container.querySelectorAll('.roadmap-node'));
-        if(nodes.length < 2) return;
-
-        // Determine top and bottom to size svg
-        const firstRect = nodes[0].getBoundingClientRect();
-        const lastRect = nodes[nodes.length-1].getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-
-        const height = (lastRect.bottom - firstRect.top) + 160;
-        svg.setAttribute('height', String(height));
-        svg.setAttribute('viewBox', `0 0 200 ${height}`);
-
-        // For each gap create a curved path
-        nodes.forEach((node, idx)=>{
-            if(idx === nodes.length-1) return;
-            const a = node.getBoundingClientRect();
-            const b = nodes[idx+1].getBoundingClientRect();
-
-            // coordinates relative to svg top
-            const topOffset = a.top - containerRect.top + a.height/2 + 20;
-            const bottomOffset = b.top - containerRect.top + b.height/2 + 20;
-
-            const x1 = 100; // center
-            const x2 = 100;
-            const mid = (topOffset + bottomOffset) / 2;
-
-            const path = document.createElementNS(svgNS,'path');
-            const d = `M ${x1} ${topOffset} C ${x1-36} ${mid} ${x2+36} ${mid} ${x2} ${bottomOffset}`;
-            path.setAttribute('d', d);
-            path.classList.add('connector-path');
-
-            // unlocked if previous node (by lesson id) is completed
-            const prevNode = nodes[idx];
-            const prevId = Number(prevNode.dataset.lessonId);
-            if (completed.has(prevId)){
-                path.classList.add('unlocked');
-            }
-
-            svg.appendChild(path);
+        nodes.forEach((node)=>{
+            const connector = node.querySelector('.roadmap-step-connector');
+            if (!connector) return;
+            const lessonId = Number(node.dataset.lessonId);
+            connector.classList.toggle('unlocked', completed.has(lessonId));
         });
-
-        container.appendChild(svg);
     }
 
     /* Smooth drag-to-scroll with inertia (only when dragging background, not nodes) */
@@ -229,10 +248,8 @@
         modalDesc.textContent = lesson.desc || '';
 
         // build checklist from roadmapTopics or fallback to phases subSteps
-        const savedPathKey = localStorage.getItem('selectedPath') || pathName;
-        const topics = (window.roadmapTopics && window.roadmapTopics[savedPathKey] && window.roadmapTopics[savedPathKey][String(index+1)]) || phases[index].subSteps || [];
-
-        renderChecklist(savedPathKey, index+1, topics);
+        const meta = getModuleTopicsForIndex(index);
+        renderChecklist(meta.pathKey, index+1, meta.topics || []);
 
         modal.classList.remove('hidden');
         modal.setAttribute('aria-hidden','false');
@@ -355,16 +372,16 @@
     modalBackdrop.addEventListener('click', closeModal);
 
     function animateConnectorGlow(index){
-        const svg = container.querySelector('.connectors-svg');
-        if(!svg) return;
-        const paths = svg.querySelectorAll('.connector-path');
-        const path = paths[index];
-        if(!path) return;
-        path.classList.add('glow-anim');
+        const nodes = Array.from(container.querySelectorAll('.roadmap-node'));
+        const node = nodes[index];
+        if (!node) return;
+        const connector = node.querySelector('.roadmap-step-connector');
+        if (!connector) return;
+        connector.classList.add('glow-anim', 'unlocked');
         // ensure it stays unlocked style once done
         setTimeout(()=>{
-            path.classList.remove('glow-anim');
-            path.classList.add('unlocked');
+            connector.classList.remove('glow-anim');
+            connector.classList.add('unlocked');
         }, 900);
     }
 
