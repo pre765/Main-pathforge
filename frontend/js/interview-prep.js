@@ -20,7 +20,33 @@
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
+            if (item.dataset.section === 'mock-interview') {
+                showSection('check-resume');
+                const results = document.getElementById('results-container');
+                if (results) results.hidden = false;
+                const mockCard = document.getElementById('mock-interview-card');
+                if (mockCard) mockCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
             showSection(item.dataset.section);
+        });
+    });
+
+    document.querySelectorAll('.quick-action-btn[data-target-section]').forEach((actionBtn) => {
+        actionBtn.addEventListener('click', function () {
+            const targetSection = actionBtn.dataset.targetSection;
+            if (!targetSection) return;
+            if (targetSection === 'mock-interview') {
+                showSection('check-resume');
+                const results = document.getElementById('results-container');
+                if (results) results.hidden = false;
+                const mockCard = document.getElementById('mock-interview-card');
+                if (mockCard) mockCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+            showSection(targetSection);
+            const panel = document.getElementById('section-' + targetSection);
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 
@@ -178,45 +204,248 @@ ${data['past-jobs'] ? '\\subsection*{Previous Experience}\n' + data['past-jobs']
     }
 
     // ========== Resume Intelligence Engine ==========
-    const btnAnalyze = document.getElementById('btn-analyze');
-    const analyzeSpinner = document.getElementById('analyze-spinner');
     const resultsContainer = document.getElementById('results-container');
-    const scoreBig = document.getElementById('score-big');
+    const jdTextEl = document.getElementById('jd-text');
+    const resumeTextEl = document.getElementById('resume-text');
+    const scoreBig = document.getElementById('score-big-new');
+    const keywordMatchValue = document.getElementById('keyword-match-value');
     const readinessBadge = document.getElementById('readiness-badge');
     const scoreExplanation = document.getElementById('score-explanation');
-    const scoreProgressFill = document.getElementById('score-progress-fill');
+    const btnAnalyze = document.getElementById('btn-analyze');
+    const btnReanalyze = document.getElementById('btn-reanalyze');
+    const btnStartMock = document.getElementById('btn-start-mock');
+    const breakdownSection = document.getElementById('breakdown-section');
 
-    if (btnAnalyze) {
-        btnAnalyze.addEventListener('click', function() {
-            const resumeText = document.getElementById('resume-text');
-            const jdText = document.getElementById('jd-text');
-            if (!resumeText || !jdText) return;
+    const stepNodes = document.querySelectorAll('.rp-step');
+    function setActiveStep(stepNumber) {
+        stepNodes.forEach(function(step, index) {
+            step.classList.toggle('is-active', index + 1 === stepNumber);
+        });
+    }
 
-            btnAnalyze.classList.add('loading');
-            btnAnalyze.setAttribute('aria-busy', 'true');
+    const UploadSection = {
+        file: null,
+        init: function() {
+            const zone = document.getElementById('resume-upload-zone');
+            const input = document.getElementById('resume-upload-input');
+            const label = document.getElementById('resume-upload-text');
+            const preview = document.getElementById('resume-file-preview');
+            const previewName = document.getElementById('resume-file-name');
+            const removeBtn = document.getElementById('btn-remove-resume');
+            if (!zone || !input || !label || !preview || !previewName || !removeBtn || !resumeTextEl) return;
 
-            setTimeout(function() {
-                btnAnalyze.classList.remove('loading');
-                btnAnalyze.setAttribute('aria-busy', 'false');
+            const defaultLabel = 'Drag and drop your resume';
 
-                const score = Math.floor(Math.random() * 25) + 70;
-                scoreBig.textContent = score + '%';
-                if (scoreProgressFill) scoreProgressFill.style.width = score + '%';
+            const renderPreview = function(fileName) {
+                preview.hidden = false;
+                previewName.textContent = fileName;
+            };
 
-                const levels = [
-                    { badge: 'Strong Candidate', text: 'You meet most required skills but lack some preferred tools.' },
-                    { badge: 'Good Fit', text: 'Your profile aligns well with the role; a few tweaks could strengthen your application.' },
-                    { badge: 'Needs Work', text: 'Several key skills or experience points are missing. Use the checklist and roadmap below.' }
-                ];
-                const level = score >= 75 ? levels[0] : score >= 55 ? levels[1] : levels[2];
-                readinessBadge.textContent = level.badge;
-                scoreExplanation.textContent = level.text;
+            const clearFile = function() {
+                UploadSection.file = null;
+                input.value = '';
+                resumeTextEl.value = '';
+                label.textContent = defaultLabel;
+                preview.hidden = true;
+                previewName.textContent = '';
+            };
 
-                resultsContainer.hidden = false;
-                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const onFile = function(file) {
+                if (!file) return;
+                UploadSection.file = file;
+                renderPreview(file.name);
+                label.textContent = 'Uploaded: ' + file.name;
+                // Fallback content for non-text files so analysis flow still proceeds.
+                resumeTextEl.value = file.name;
+                if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        resumeTextEl.value = String(evt.target && evt.target.result ? evt.target.result : '');
+                    };
+                    reader.readAsText(file);
+                }
+            };
 
-                populateInterviewQuestions();
-            }, 1800);
+            zone.addEventListener('click', function() { input.click(); });
+            zone.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    input.click();
+                }
+            });
+            zone.addEventListener('dragover', function(event) {
+                event.preventDefault();
+                zone.classList.add('drag-over');
+            });
+            zone.addEventListener('dragleave', function() { zone.classList.remove('drag-over'); });
+            zone.addEventListener('drop', function(event) {
+                event.preventDefault();
+                zone.classList.remove('drag-over');
+                const file = event.dataTransfer && event.dataTransfer.files ? event.dataTransfer.files[0] : null;
+                if (!file) return;
+                input.files = event.dataTransfer.files;
+                onFile(file);
+            });
+            input.addEventListener('change', function() { onFile(input.files && input.files[0] ? input.files[0] : null); });
+            removeBtn.addEventListener('click', clearFile);
+        },
+        hasInput: function() {
+            return !!(resumeTextEl && resumeTextEl.value.trim());
+        }
+    };
+
+    const ScoreCard = {
+        currentScore: 0,
+        setLoading: function(isLoading) {
+            if (!btnAnalyze) return;
+            btnAnalyze.classList.toggle('loading', isLoading);
+            btnAnalyze.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+        },
+        setScore: function(score, keywordPct) {
+            const target = Math.max(0, Math.min(100, score));
+            const keyword = Math.max(0, Math.min(100, keywordPct));
+            const start = this.currentScore;
+            const steps = 20;
+            let tick = 0;
+            const diff = target - start;
+
+            const timer = setInterval(function() {
+                tick += 1;
+                const value = Math.round(start + (diff * tick) / steps);
+                if (scoreBig) scoreBig.textContent = value + '%';
+                if (tick >= steps) clearInterval(timer);
+            }, 35);
+
+            this.currentScore = target;
+            if (keywordMatchValue) keywordMatchValue.textContent = keyword + '%';
+            if (typeof window.animateAtsScore === 'function') {
+                window.animateAtsScore(target);
+            }
+
+            const levels = [
+                { badge: 'Strong', text: 'You meet most required skills and are interview-ready.' },
+                { badge: 'Moderate', text: 'Your profile is promising with a few notable gaps to close.' },
+                { badge: 'Weak', text: 'Key requirements are missing. Prioritize checklist and roadmap items.' }
+            ];
+            const level = target >= 75 ? levels[0] : target >= 55 ? levels[1] : levels[2];
+            if (readinessBadge) readinessBadge.textContent = level.badge;
+            if (scoreExplanation) scoreExplanation.textContent = level.text;
+        }
+    };
+
+    const BreakdownCard = {
+        init: function() {
+            document.querySelectorAll('.breakdown-toggle').forEach(function(toggle) {
+                toggle.addEventListener('click', function() {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    const content = toggle.nextElementSibling;
+                    toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                    if (content) content.hidden = expanded;
+                });
+            });
+        }
+    };
+
+    const MockInterviewCard = {
+        init: function() {
+            const btnRun = document.getElementById('btn-mock-run');
+            const progressFill = document.getElementById('mock-progress-fill');
+            const progressText = document.getElementById('mock-progress-text');
+            const feedback = document.getElementById('mock-feedback');
+            const feedbackSummary = document.getElementById('mock-feedback-summary');
+            const feedbackScores = document.getElementById('mock-feedback-scores');
+            const mockType = document.getElementById('mock-type');
+            const mockDifficulty = document.getElementById('mock-difficulty');
+            if (!btnRun || !progressFill || !progressText || !feedback || !feedbackSummary || !feedbackScores || !mockType || !mockDifficulty) return;
+
+            btnRun.addEventListener('click', function() {
+                let progress = 0;
+                feedback.hidden = true;
+                progressText.textContent = 'Interview running...';
+                setActiveStep(4);
+
+                const timer = setInterval(function() {
+                    progress += 10;
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = 'Interview in progress: ' + progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(timer);
+                        progressText.textContent = 'Interview completed';
+                        feedback.hidden = false;
+                        feedbackSummary.textContent = 'Strong communication and structure. Improve depth on system trade-offs and measurable outcomes.';
+                        feedbackScores.innerHTML =
+                            '<span>Confidence: 82%</span>' +
+                            '<span>Technical Accuracy: 76%</span>' +
+                            '<span>Communication: 88%</span>' +
+                            '<span>Type: ' + mockType.value.toUpperCase() + '</span>' +
+                            '<span>Difficulty: ' + mockDifficulty.value.toUpperCase() + '</span>';
+                    }
+                }, 240);
+            });
+        }
+    };
+
+    function runResumeAnalysis() {
+        if (!resumeTextEl || !jdTextEl) return;
+        if (!UploadSection.hasInput() || !jdTextEl.value.trim()) {
+            alert('Please upload your resume and paste the job description.');
+            return;
+        }
+
+        setActiveStep(2);
+        ScoreCard.setLoading(true);
+        resultsContainer.hidden = false;
+
+        setTimeout(function() {
+            const score = Math.floor(Math.random() * 25) + 70;
+            const keyword = Math.max(45, score - Math.floor(Math.random() * 18));
+            ScoreCard.setLoading(false);
+            ScoreCard.setScore(score, keyword);
+            if (btnReanalyze) btnReanalyze.hidden = false;
+            setActiveStep(3);
+            populateInterviewQuestions();
+
+            if (breakdownSection) {
+                breakdownSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 1500);
+    }
+
+    UploadSection.init();
+    BreakdownCard.init();
+    MockInterviewCard.init();
+
+    if (btnAnalyze) btnAnalyze.addEventListener('click', runResumeAnalysis);
+    if (btnReanalyze) btnReanalyze.addEventListener('click', runResumeAnalysis);
+    if (btnStartMock) {
+        btnStartMock.addEventListener('click', function() {
+            resultsContainer.hidden = false;
+            setActiveStep(4);
+            const mockCard = document.getElementById('mock-interview-card');
+            if (mockCard) mockCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    const btnDownloadImproved = document.getElementById('btn-download-improved');
+    if (btnDownloadImproved) {
+        btnDownloadImproved.addEventListener('click', function() {
+            const suggestionText = [
+                'Improved Resume Suggestions',
+                '',
+                '1. Add Docker and AWS projects to match tooling requirements.',
+                '2. Quantify impact with percentages and scale.',
+                '3. Add LinkedIn and a one-line professional headline.',
+                '4. Prioritize roadmap modules: Docker Fundamentals, AWS Basics.'
+            ].join('\n');
+            const blob = new Blob([suggestionText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'improved-resume-suggestions.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         });
     }
 

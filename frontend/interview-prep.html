@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/interview-prep.css">
     <link rel="stylesheet" href="css/interview-prep-enhancements.css">
     <link rel="stylesheet" href="css/resume-dashboard.css">
+    <link rel="stylesheet" href="css/interview-prep-redesign.css">
     <link rel="stylesheet" href="css/select-global.css">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -34,6 +35,102 @@
                 <button class="prep-nav-item" data-section="check-resume">Check Resume</button>
                 <button class="prep-nav-item" data-section="mock-interview">Mock Interview</button>
             </nav>
+            <div class="sidebar-widgets">
+                <section class="sidebar-card quick-actions-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"></path></svg>
+                        Quick Actions
+                    </h3>
+                    <div class="quick-actions-list">
+                        <button type="button" class="quick-action-btn" data-target-section="build-resume">
+                            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                            Build Resume
+                        </button>
+                        <button type="button" class="quick-action-btn" data-target-section="check-resume">
+                            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="3" width="13" height="18" rx="2"></rect><path d="M8 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12"></path><path d="M12 12h5M12 16h5"></path></svg>
+                            Check Resume
+                        </button>
+                        <button type="button" class="quick-action-btn" data-target-section="mock-interview">
+                            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 1 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0"></path><path d="M12 18v3"></path></svg>
+                            Start Mock Interview
+                        </button>
+                        <a class="quick-action-btn" href="roadmap.html">
+                            <svg class="quick-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14.7 6.3l3 3m-9.4 9.4l-4 1 1-4 9.9-9.9a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2z"></path></svg>
+                            Improve Skills
+                        </a>
+                    </div>
+                </section>
+
+                <section class="sidebar-card readiness-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"></path></svg>
+                        Career Readiness
+                    </h3>
+                    <div class="readiness-mini-grid">
+                        <div class="mini-score">
+                            <svg viewBox="0 0 40 40" class="mini-score-ring">
+                                <circle cx="20" cy="20" r="16" class="mini-ring-bg"></circle>
+                                <circle cx="20" cy="20" r="16" class="mini-ring-fill mini-ring-resume"></circle>
+                            </svg>
+                            <span>Resume</span>
+                        </div>
+                        <div class="mini-score">
+                            <svg viewBox="0 0 40 40" class="mini-score-ring">
+                                <circle cx="20" cy="20" r="16" class="mini-ring-bg"></circle>
+                                <circle cx="20" cy="20" r="16" class="mini-ring-fill mini-ring-interview"></circle>
+                            </svg>
+                            <span>Interview</span>
+                        </div>
+                        <div class="mini-score">
+                            <svg viewBox="0 0 40 40" class="mini-score-ring">
+                                <circle cx="20" cy="20" r="16" class="mini-ring-bg"></circle>
+                                <circle cx="20" cy="20" r="16" class="mini-ring-fill mini-ring-skill"></circle>
+                            </svg>
+                            <span>Skills</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sidebar-card goals-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>
+                        Upcoming Goals
+                    </h3>
+                    <label class="goal-item"><input type="checkbox"> <span>Complete 3 DSA problems</span></label>
+                    <label class="goal-item"><input type="checkbox"> <span>Improve resume metrics</span></label>
+                    <label class="goal-item"><input type="checkbox"> <span>Take 1 mock interview</span></label>
+                </section>
+
+                <section class="sidebar-card badges-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 15l-3.5 2 1-3.8L6.5 10l3.9-.3L12 6l1.6 3.7 3.9.3-3 3.2 1 3.8z"></path><path d="M8 21h8"></path></svg>
+                        Achievements
+                    </h3>
+                    <div class="badge-pill">First Resume Uploaded</div>
+                    <div class="badge-pill">80%+ ATS Score</div>
+                    <div class="badge-pill">5 Mock Interviews Completed</div>
+                </section>
+
+                <section class="sidebar-card insights-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg>
+                        Growth Insights
+                    </h3>
+                    <ul class="insight-list">
+                        <li>Add quantified metrics to 2 bullet points.</li>
+                        <li>Your resume lacks cloud tools.</li>
+                        <li>No mock interview completed this week.</li>
+                    </ul>
+                </section>
+
+                <section class="sidebar-card focus-card">
+                    <h3 class="sidebar-card-title">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l1.7 3.6L18 8.3l-3.4 2.3.9 3.9L12 12.7l-3.5 1.8.9-3.9L6 8.3l4.3-1.7L12 3z"></path></svg>
+                        Daily Focus
+                    </h3>
+                    <p class="focus-text">Today: Improve your impact metrics section.</p>
+                </section>
+            </div>
         </aside>
 
         <div class="interview-prep-content">
@@ -100,91 +197,98 @@
 
             <!-- Check Resume Section - Resume Intelligence Engine -->
             <section class="prep-section" id="section-check-resume">
-                <div class="resume-intelligence-wrap">
-                    <!-- 1. HERO INPUT SECTION -->
-                    <section class="hero-input-section card-section">
-                        <h2 class="hero-title">Resume Intelligence Engine</h2>
-                        <p class="hero-subtitle">Analyze your job readiness instantly</p>
-                        
-                        <!-- Upload Method Tabs -->
-                        <div class="upload-method-tabs">
-                            <button type="button" class="upload-method-tab active" data-method="paste">Paste Text</button>
-                            <button type="button" class="upload-method-tab" data-method="upload">Upload File</button>
-                        </div>
+                <div class="rp-wrap">
+                    <div class="rp-progress" aria-label="Resume improvement flow">
+                        <div class="rp-step is-active"><span>Step 1</span><strong>Upload</strong></div>
+                        <div class="rp-step"><span>Step 2</span><strong>Analyze</strong></div>
+                        <div class="rp-step"><span>Step 3</span><strong>Improve</strong></div>
+                        <div class="rp-step"><span>Step 4</span><strong>Mock Interview</strong></div>
+                    </div>
 
-                        <!-- Paste Method (Default) -->
-                        <div class="input-row" id="paste-method">
-                            <div class="input-group-hero">
-                                <label for="resume-text">Resume</label>
-                                <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
-                            </div>
-                            <div class="input-group-hero">
-                                <label for="jd-text">Job Description</label>
-                                <textarea id="jd-text" placeholder="Paste the job description here..."></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Upload Method (Hidden by default) -->
-                        <div id="upload-method" style="display: none;">
-                            <div class="input-group-hero">
-                                <label>Upload Resume (PDF, DOCX, or TXT)</label>
-                                <div class="upload-zone" id="resume-upload-zone">
-                                    <div class="upload-icon">📄</div>
-                                    <div class="upload-zone-text">Drag your resume here</div>
-                                    <div class="upload-zone-hint">or click to browse</div>
-                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+                    <div class="rp-top-grid">
+                        <section class="card-section rp-main-panel" aria-labelledby="rp-hero-title">
+                            <div class="rp-title-row">
+                                <svg class="rp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                                <div>
+                                    <h2 class="hero-title" id="rp-hero-title">Resume Intelligence Engine</h2>
+                                    <p class="hero-subtitle">Analyze your job readiness instantly</p>
                                 </div>
                             </div>
-                            <div class="input-group-hero">
-                                <label>Upload Job Description (Optional)</label>
-                                <div class="upload-zone" id="jd-upload-zone">
-                                    <div class="upload-icon">📋</div>
-                                    <div class="upload-zone-text">Drag job description here</div>
-                                    <div class="upload-zone-hint">or click to browse</div>
-                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".pdf,.docx,.txt">
+
+                            <div class="input-row rp-upload-row">
+                                <div class="input-group-hero">
+                                    <label for="resume-upload-input">
+                                        <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                                        Resume Upload
+                                    </label>
+                                    <div class="upload-zone" id="resume-upload-zone" role="button" tabindex="0" aria-label="Upload resume">
+                                        <div class="upload-icon">
+                                            <svg class="rp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
+                                        </div>
+                                        <div class="upload-zone-text" id="resume-upload-text">Drag and drop your resume</div>
+                                        <div class="upload-zone-hint">or click to browse your computer</div>
+                                        <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,.doc,.docx,.txt">
+                                    </div>
+                                    <div class="rp-file-preview" id="resume-file-preview" hidden>
+                                        <span id="resume-file-name"></span>
+                                        <button type="button" id="btn-remove-resume" class="rp-link-btn">Remove</button>
+                                    </div>
+                                    <textarea id="resume-text" hidden aria-hidden="true"></textarea>
+                                </div>
+
+                                <div class="input-group-hero">
+                                    <label for="jd-text">
+                                        <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="3" width="13" height="18" rx="2"></rect><path d="M8 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12"></path><path d="M12 12h5M12 16h5"></path></svg>
+                                        Job Description
+                                    </label>
+                                    <textarea id="jd-text" placeholder="Paste the full job description here..."></textarea>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Job Role & Experience Selectors -->
-                        <div class="filter-row">
-                            <div class="select-group">
-                                <label for="job-role-select">Target Job Role (Optional)</label>
-                                <select id="job-role-select">
-                                    <option value="">Select a role...</option>
-                                    <option value="frontend">Frontend Engineer</option>
-                                    <option value="backend">Backend Engineer</option>
-                                    <option value="fullstack">Full Stack Engineer</option>
-                                    <option value="data">Data Engineer</option>
-                                    <option value="ml">ML Engineer</option>
-                                    <option value="devops">DevOps Engineer</option>
-                                </select>
+                            <div class="filter-row">
+                                <div class="select-group">
+                                    <label for="job-role-select">Target Job Role (Optional)</label>
+                                    <select id="job-role-select">
+                                        <option value="">Select a role...</option>
+                                        <option value="frontend">Frontend Engineer</option>
+                                        <option value="backend">Backend Engineer</option>
+                                        <option value="fullstack">Full Stack Engineer</option>
+                                        <option value="data">Data Engineer</option>
+                                        <option value="ml">ML Engineer</option>
+                                        <option value="devops">DevOps Engineer</option>
+                                    </select>
+                                </div>
+                                <div class="select-group">
+                                    <label for="experience-level-select">Your Experience Level</label>
+                                    <select id="experience-level-select">
+                                        <option value="">Select level...</option>
+                                        <option value="entry">Entry Level (0-2 years)</option>
+                                        <option value="junior">Junior (2-5 years)</option>
+                                        <option value="mid">Mid-Level (5-10 years)</option>
+                                        <option value="senior">Senior (10+ years)</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="select-group">
-                                <label for="experience-level-select">Your Experience Level</label>
-                                <select id="experience-level-select">
-                                    <option value="">Select level...</option>
-                                    <option value="entry">Entry Level (0-2 years)</option>
-                                    <option value="junior">Junior (2-5 years)</option>
-                                    <option value="mid">Mid-Level (5-10 years)</option>
-                                    <option value="senior">Senior (10+ years)</option>
-                                </select>
+
+                            <div class="analyze-wrap rp-actions-row">
+                                <button type="button" class="btn-analyze" id="btn-analyze">
+                                    <span class="btn-text">Analyze</span>
+                                    <span class="btn-spinner" id="analyze-spinner" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn-analyze btn-reanalyze" id="btn-reanalyze" hidden>
+                                    <span>Re-analyze</span>
+                                </button>
+                                <button type="button" class="btn-download-resume" id="btn-start-mock">
+                                    <span>Start Mock Interview</span>
+                                </button>
                             </div>
-                        </div>
+                        </section>
 
-                        <div class="analyze-wrap">
-                            <button type="button" class="btn-analyze" id="btn-analyze">
-                                <span class="btn-text">Analyze</span>
-                                <span class="btn-spinner" id="analyze-spinner" aria-hidden="true"></span>
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- Results container (shown after analysis) -->
-                    <div class="results-container" id="results-container" hidden>
-                        <!-- 2. SCORE OVERVIEW CARD -->
-                        <section class="score-overview-card card-section">
-                            <!-- ATS Score Circle Visualization -->
+                        <aside class="card-section rp-score-card" id="score-card" aria-live="polite">
+                            <h3 class="rp-score-heading">
+                                <svg class="rp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"></path></svg>
+                                Live Score
+                            </h3>
                             <div class="ats-score-visual">
                                 <div class="score-circle-wrap">
                                     <svg class="score-circle-svg" viewBox="0 0 100 100">
@@ -198,95 +302,160 @@
                                         <circle class="score-circle-fill" id="score-circle-fill" cx="50" cy="50" r="45" style="stroke-dasharray: 282.7; stroke-dashoffset: 282.7;"></circle>
                                     </svg>
                                     <div class="score-circle-text">
-                                        <span class="score-number" id="score-big-new">78</span>
-                                        <span class="score-label">Match %</span>
+                                        <span class="score-number" id="score-big-new">0%</span>
+                                        <span class="score-label">ATS MATCH</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Keyword Match & Readiness -->
-                            <div class="keyword-match-wrap">
-                                <div class="keyword-match-icon">🎯</div>
-                                <div class="keyword-match-content">
-                                    <div class="keyword-match-label">Keyword Match</div>
-                                    <div class="keyword-match-value" id="keyword-match-value">68%</div>
+                            <div class="rp-metric-grid">
+                                <div class="rp-metric-item">
+                                    <svg class="rp-metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 5h10M9 12h10M9 19h10"></path><path d="M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+                                    <div>
+                                        <span class="keyword-match-label">Keyword Match</span>
+                                        <div class="keyword-match-value" id="keyword-match-value">0%</div>
+                                    </div>
+                                </div>
+                                <div class="rp-metric-item">
+                                    <svg class="rp-metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l2.5 2.5L16 9"></path></svg>
+                                    <div>
+                                        <span class="keyword-match-label">Candidate Status</span>
+                                        <div class="readiness-badge" id="readiness-badge">Waiting</div>
+                                    </div>
                                 </div>
                             </div>
+                            <p class="score-explanation" id="score-explanation">Upload your resume and JD, then run analysis.</p>
+                        </aside>
+                    </div>
 
-                            <div style="text-align: center;">
-                                <div class="readiness-badge" id="readiness-badge">Strong Candidate</div>
-                                <p class="score-explanation" id="score-explanation">You meet most required skills but lack some preferred tools.</p>
+                    <div class="results-container" id="results-container" hidden>
+                        <section class="card-section rp-mock-card" id="mock-interview-card">
+                            <h3 class="section-heading">
+                                <svg class="rp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 1 0 6 0V6a3 3 0 0 0-3-3z"></path><path d="M19 11a7 7 0 0 1-14 0"></path><path d="M12 18v3"></path></svg>
+                                Mock Interview
+                            </h3>
+                            <div class="rp-mock-controls">
+                                <div class="select-group">
+                                    <label for="mock-type">Interview Type</label>
+                                    <select id="mock-type">
+                                        <option value="hr">HR</option>
+                                        <option value="technical" selected>Technical</option>
+                                        <option value="behavioral">Behavioral</option>
+                                    </select>
+                                </div>
+                                <div class="select-group">
+                                    <label for="mock-difficulty">Difficulty Level</label>
+                                    <select id="mock-difficulty">
+                                        <option value="easy">Easy</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                </div>
+                                <label class="rp-toggle">
+                                    <input type="checkbox" id="mock-timer" checked>
+                                    <span>Enable Timer</span>
+                                </label>
+                                <button type="button" class="btn-download-resume" id="btn-mock-run">Start Interview</button>
+                            </div>
+                            <div class="rp-progress-track" aria-label="Mock interview progress">
+                                <div class="rp-progress-fill" id="mock-progress-fill"></div>
+                            </div>
+                            <p class="rp-progress-text" id="mock-progress-text">Not started</p>
+                            <div class="rp-mock-feedback" id="mock-feedback" hidden>
+                                <h4>AI Feedback Summary</h4>
+                                <p id="mock-feedback-summary">Clear communication and good technical depth. Improve metric-based storytelling.</p>
+                                <div class="rp-feedback-scores" id="mock-feedback-scores"></div>
                             </div>
                         </section>
 
-                        <!-- 3. ANALYSIS BREAKDOWN (4 cards) -->
-                        <section class="analysis-breakdown card-section">
+                        <section class="analysis-breakdown card-section" id="breakdown-section">
                             <h3 class="section-heading">Analysis Breakdown</h3>
                             <div class="breakdown-grid" id="breakdown-grid">
-                                <div class="breakdown-card" data-card="skills">
-                                    <div class="breakdown-card-header">
-                                        <span class="breakdown-title">Skills Match</span>
+                                <article class="breakdown-card" data-card="skills">
+                                    <button class="breakdown-toggle" type="button" aria-expanded="false">
+                                        <span class="breakdown-title-wrap">
+                                            <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14.7 6.3l3 3m-9.4 9.4l-4 1 1-4 9.9-9.9a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2z"></path></svg>
+                                            <span class="breakdown-title">Skills Match</span>
+                                            <span class="info-tip" data-tooltip="Coverage of required tools and technologies" aria-label="Skills tooltip">?</span>
+                                        </span>
                                         <span class="status-badge status-needs">Needs Improvement</span>
+                                    </button>
+                                    <div class="breakdown-content" hidden>
+                                        <ul class="breakdown-bullets">
+                                            <li>Missing Docker</li>
+                                            <li>Missing AWS</li>
+                                        </ul>
+                                        <details class="example-rewrite">
+                                            <summary>Example fix</summary>
+                                            <p>Containerized ML model using Docker and deployed on AWS ECS.</p>
+                                        </details>
                                     </div>
-                                    <ul class="breakdown-bullets">
-                                        <li>Missing Docker</li>
-                                        <li>Missing AWS</li>
-                                    </ul>
-                                    <details class="example-rewrite">
-                                        <summary>Example fix</summary>
-                                        <p>"Containerized ML model using Docker; deployed on AWS ECS."</p>
-                                    </details>
-                                </div>
-                                <div class="breakdown-card" data-card="experience">
-                                    <div class="breakdown-card-header">
-                                        <span class="breakdown-title">Experience Strength</span>
+                                </article>
+                                <article class="breakdown-card" data-card="experience">
+                                    <button class="breakdown-toggle" type="button" aria-expanded="false">
+                                        <span class="breakdown-title-wrap">
+                                            <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 9 9"></path><path d="M12 7v5l3 3"></path></svg>
+                                            <span class="breakdown-title">Experience Strength</span>
+                                            <span class="info-tip" data-tooltip="Clarity and relevance of prior work" aria-label="Experience tooltip">?</span>
+                                        </span>
                                         <span class="status-badge status-good">Good</span>
+                                    </button>
+                                    <div class="breakdown-content" hidden>
+                                        <ul class="breakdown-bullets">
+                                            <li>Years of experience clearly stated</li>
+                                            <li>Consider adding company names</li>
+                                        </ul>
+                                        <details class="example-rewrite">
+                                            <summary>Example rewrite</summary>
+                                            <p>Senior Developer at TechCorp (2020-present). Led team of 4 engineers.</p>
+                                        </details>
                                     </div>
-                                    <ul class="breakdown-bullets">
-                                        <li>Years of experience clearly stated</li>
-                                        <li>Consider adding company names</li>
-                                    </ul>
-                                    <details class="example-rewrite">
-                                        <summary>Example rewrite</summary>
-                                        <p>"Senior Developer at TechCorp (2020–present). Led team of 4."</p>
-                                    </details>
-                                </div>
-                                <div class="breakdown-card" data-card="impact">
-                                    <div class="breakdown-card-header">
-                                        <span class="breakdown-title">Impact &amp; Metrics</span>
+                                </article>
+                                <article class="breakdown-card" data-card="impact">
+                                    <button class="breakdown-toggle" type="button" aria-expanded="false">
+                                        <span class="breakdown-title-wrap">
+                                            <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16"></path><path d="M6 16V9M12 16V5M18 16v-3"></path></svg>
+                                            <span class="breakdown-title">Impact and Metrics</span>
+                                            <span class="info-tip" data-tooltip="Evidence of business impact and quantified outcomes" aria-label="Impact tooltip">?</span>
+                                        </span>
                                         <span class="status-badge status-needs">Needs Improvement</span>
+                                    </button>
+                                    <div class="breakdown-content" hidden>
+                                        <ul class="breakdown-bullets">
+                                            <li>Add quantified metrics (percent, time, scale)</li>
+                                            <li>Use action verbs (Led, Reduced, Increased)</li>
+                                        </ul>
+                                        <details class="example-rewrite">
+                                            <summary>Example rewrite</summary>
+                                            <p>Reduced API latency by 40 percent and improved test coverage to 90 percent.</p>
+                                        </details>
                                     </div>
-                                    <ul class="breakdown-bullets">
-                                        <li>Add quantified metrics (%, time, scale)</li>
-                                        <li>Use action verbs (Led, Reduced, Increased)</li>
-                                    </ul>
-                                    <details class="example-rewrite">
-                                        <summary>Example rewrite</summary>
-                                        <p>"Reduced API latency by 40%; improved test coverage to 90%."</p>
-                                    </details>
-                                </div>
-                                <div class="breakdown-card" data-card="branding">
-                                    <div class="breakdown-card-header">
-                                        <span class="breakdown-title">Professional Branding</span>
+                                </article>
+                                <article class="breakdown-card" data-card="branding">
+                                    <button class="breakdown-toggle" type="button" aria-expanded="false">
+                                        <span class="breakdown-title-wrap">
+                                            <svg class="rp-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.8-3.2 5-5 8-5s6.2 1.8 8 5"></path></svg>
+                                            <span class="breakdown-title">Professional Branding</span>
+                                            <span class="info-tip" data-tooltip="Personal brand elements like headline, links, and consistency" aria-label="Branding tooltip">?</span>
+                                        </span>
                                         <span class="status-badge status-needs">Needs Improvement</span>
+                                    </button>
+                                    <div class="breakdown-content" hidden>
+                                        <ul class="breakdown-bullets">
+                                            <li>Add LinkedIn profile link</li>
+                                            <li>Ensure consistent formatting</li>
+                                        </ul>
+                                        <details class="example-rewrite">
+                                            <summary>Example rewrite</summary>
+                                            <p>Add a one-line professional headline and your LinkedIn URL in the header.</p>
+                                        </details>
                                     </div>
-                                    <ul class="breakdown-bullets">
-                                        <li>Add LinkedIn profile link</li>
-                                        <li>Ensure consistent formatting</li>
-                                    </ul>
-                                    <details class="example-rewrite">
-                                        <summary>Example rewrite</summary>
-                                        <p>Add a one-line professional headline and LinkedIn URL in the header.</p>
-                                    </details>
-                                </div>
+                                </article>
                             </div>
                         </section>
 
-                        <!-- 4. IMMEDIATE ACTION CHECKLIST -->
                         <section class="action-checklist card-section">
                             <h3 class="section-heading">Immediate Fix Checklist</h3>
-                            
-                            <!-- Skills Gap -->
                             <div class="skills-gap-section">
                                 <div class="skills-gap-title">Missing Skills</div>
                                 <div class="skills-gap-list" id="skills-gap-list">
@@ -294,37 +463,30 @@
                                     <span class="skill-gap-badge">AWS</span>
                                 </div>
                             </div>
-
-                            <!-- Checklist Items -->
                             <div class="checklist-box" id="action-checklist">
                                 <label class="checklist-item"><input type="checkbox"> <span>Add Docker project</span></label>
                                 <label class="checklist-item"><input type="checkbox"> <span>Add quantified metrics</span></label>
                                 <label class="checklist-item"><input type="checkbox"> <span>Add LinkedIn profile link</span></label>
                             </div>
                         </section>
-                                <label class="checklist-item"><input type="checkbox"> <span>Add LinkedIn profile link</span></label>
-                            </div>
-                        </section>
 
-                        <!-- 5. ROADMAP RECOMMENDATIONS -->
                         <section class="roadmap-recommendations card-section">
                             <h3 class="section-heading">Recommended Learning Path</h3>
                             <div class="roadmap-modules" id="roadmap-modules">
-                                <a href="roadmap.html" class="module-card">DevOps → Docker Fundamentals</a>
-                                <a href="roadmap.html" class="module-card">Cloud → AWS Basics</a>
+                                <a href="roadmap.html" class="module-card">DevOps to Docker Fundamentals</a>
+                                <a href="roadmap.html" class="module-card">Cloud to AWS Basics</a>
                             </div>
-                            <div style="margin-top: 1.5rem; text-align: center;">
-                                <button type="button" class="btn-download-resume" id="btn-download-improved">Download Improved Resume</button>
+                            <div class="rp-download-wrap">
+                                <button type="button" class="btn-download-resume" id="btn-download-improved">Download Improved Resume Suggestions</button>
                             </div>
                         </section>
 
-                        <!-- 6. INTERVIEW QUESTIONS -->
                         <section class="interview-questions-section card-section">
                             <h3 class="section-heading">Interview Questions</h3>
                             <div class="iq-tabs">
                                 <button type="button" class="iq-tab active" data-iq="technical">Technical</button>
                                 <button type="button" class="iq-tab" data-iq="behavioral">Behavioral</button>
-                                <button type="button" class="iq-tab" data-iq="project">Project-based</button>
+                                <button type="button" class="iq-tab" data-iq="project">Project-Based</button>
                             </div>
                             <div class="iq-panels">
                                 <div class="iq-panel active" id="iq-technical">
@@ -339,7 +501,6 @@
                             </div>
                         </section>
 
-                        <!-- 7. PROFESSIONAL SUMMARY SUGGESTION -->
                         <section class="summary-suggestion card-section">
                             <h3 class="section-heading">Suggested Professional Summary</h3>
                             <div class="summary-box">
@@ -350,7 +511,6 @@
                     </div>
                 </div>
             </section>
-
             <!-- Mock Interview Section -->
             <section class="prep-section" id="section-mock-interview">
                 <div class="mock-interview-container">
@@ -371,3 +531,5 @@
     <script src="js/interview-prep.js"></script>
 </body>
 </html>
+
+

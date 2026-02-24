@@ -1,0 +1,330 @@
+.rp-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.rp-progress {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.rp-step {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.rp-step span {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.rp-step strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.rp-step.is-active {
+    border-color: rgba(0, 255, 136, 0.45);
+    box-shadow: 0 0 0 1px rgba(0, 255, 136, 0.25) inset;
+}
+
+.rp-top-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(280px, 3fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.rp-main-panel,
+.rp-score-card,
+.rp-mock-card {
+    background: linear-gradient(160deg, rgba(13, 24, 45, 0.88), rgba(8, 11, 30, 0.88));
+    border: 1px solid rgba(0, 255, 136, 0.18);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+.rp-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.rp-icon,
+.rp-icon-sm,
+.rp-metric-icon {
+    color: var(--accent-cyan);
+    flex-shrink: 0;
+}
+
+.rp-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.rp-icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.rp-upload-row .input-group-hero textarea#jd-text {
+    min-height: 220px;
+}
+
+.rp-upload-row .input-group-hero label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.upload-icon .rp-icon {
+    width: 36px;
+    height: 36px;
+}
+
+.rp-file-preview {
+    margin-top: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 10px;
+    background: rgba(0, 212, 255, 0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.86rem;
+}
+
+.rp-link-btn {
+    border: none;
+    background: transparent;
+    color: var(--accent-cyan);
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.rp-link-btn:hover {
+    text-decoration: underline;
+}
+
+.rp-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.75rem;
+}
+
+.btn-reanalyze {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.rp-score-card {
+    position: sticky;
+    top: 1.5rem;
+    border-image: linear-gradient(160deg, rgba(0, 255, 136, 0.6), rgba(0, 212, 255, 0.4)) 1;
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.12), 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
+.rp-score-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.2rem;
+}
+
+.rp-metric-grid {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.rp-metric-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.65rem 0.7rem;
+}
+
+.rp-metric-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.rp-download-wrap {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.breakdown-grid .breakdown-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.breakdown-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: inherit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.breakdown-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.breakdown-content {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.8rem 1rem 1rem;
+}
+
+.breakdown-toggle[aria-expanded="true"] + .breakdown-content {
+    display: block;
+}
+
+.info-tip {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    position: relative;
+    cursor: help;
+}
+
+.info-tip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    color: #d8f7ff;
+    background: #041225;
+    border: 1px solid rgba(0, 212, 255, 0.35);
+    border-radius: 8px;
+    padding: 0.45rem 0.55rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 2;
+    text-transform: none;
+}
+
+.info-tip:hover::after {
+    opacity: 1;
+}
+
+.rp-mock-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.rp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    height: 44px;
+}
+
+.rp-progress-track {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.rp-progress-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.35s ease;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+}
+
+.rp-progress-text {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.rp-mock-feedback {
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 212, 255, 0.08);
+    padding: 0.9rem;
+}
+
+.rp-mock-feedback h4 {
+    margin: 0 0 0.35rem;
+}
+
+.rp-feedback-scores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.rp-feedback-scores span {
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+}
+
+@media (max-width: 1080px) {
+    .rp-top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rp-score-card {
+        position: static;
+    }
+
+    .rp-mock-controls {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .rp-progress {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rp-mock-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .rp-feedback-scores {
+        grid-template-columns: 1fr;
+    }
+}
