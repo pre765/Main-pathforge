@@ -31,6 +31,8 @@ OTP_EXP_MINUTES=10
 OTP_RESEND_SECONDS=60
 OTP_MAX_ATTEMPTS=5
 EMAIL_DNS_CHECK=true
+GEMINI_API_KEY=replace-with-gemini-api-key
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 If you use MongoDB Atlas, `MONGO_URI` should look like:

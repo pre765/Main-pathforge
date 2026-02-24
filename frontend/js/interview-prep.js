@@ -25,11 +25,9 @@
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             if (item.dataset.section === 'mock-interview') {
-                showSection('check-resume');
-                const results = document.getElementById('results-container');
-                if (results) results.hidden = false;
-                const mockCard = document.getElementById('mock-interview-card');
-                if (mockCard) mockCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showSection('mock-interview');
+                const panel = document.getElementById('section-mock-interview');
+                if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 return;
             }
             showSection(item.dataset.section);
@@ -41,11 +39,9 @@
             const targetSection = actionBtn.dataset.targetSection;
             if (!targetSection) return;
             if (targetSection === 'mock-interview') {
-                showSection('check-resume');
-                const results = document.getElementById('results-container');
-                if (results) results.hidden = false;
-                const mockCard = document.getElementById('mock-interview-card');
-                if (mockCard) mockCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showSection('mock-interview');
+                const panel = document.getElementById('section-mock-interview');
+                if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 return;
             }
             showSection(targetSection);
@@ -57,6 +53,9 @@
     // Open Check Resume when landing with #check-resume
     if (window.location.hash === '#check-resume') {
         showSection('check-resume');
+    }
+    if (window.location.hash === '#mock-interview') {
+        showSection('mock-interview');
     }
 
     // Resume Builder Form Steps
@@ -208,7 +207,6 @@ ${data['past-jobs'] ? '\\subsection*{Previous Experience}\n' + data['past-jobs']
     }
 
     // ========== Resume Intelligence Engine ==========
-<<<<<<< HEAD
     const resultsContainer = document.getElementById('results-container');
     const jdTextEl = document.getElementById('jd-text');
     const resumeTextEl = document.getElementById('resume-text');
@@ -451,58 +449,6 @@ ${data['past-jobs'] ? '\\subsection*{Previous Experience}\n' + data['past-jobs']
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-=======
-    const btnAnalyze = document.getElementById('btn-analyze');
-    const resultsContainer = document.getElementById('results-container');
-    const scoreBig = document.getElementById('score-big-new');
-    const readinessBadge = document.getElementById('readiness-badge');
-    const scoreExplanation = document.getElementById('score-explanation');
-    const keywordMatchValue = document.getElementById('keyword-match-value');
-    function resolveApiBases() {
-        const bases = [];
-        const configuredGeneral = (localStorage.getItem('pathforge_api_base') || '').trim();
-        const configuredResume = (localStorage.getItem('pathforge_resume_api_base') || '').trim();
-
-        if (configuredGeneral) bases.push(configuredGeneral.replace(/\/$/, ''));
-        if (configuredResume) bases.push(configuredResume.replace(/\/$/, ''));
-
-        const host = window.location.hostname;
-        const port = window.location.port;
-        const isLikelyStaticServer = port === '5500' || port === '5501' || port === '5502';
-        const isLoopback = host === '127.0.0.1' || host === 'localhost';
-        if (isLikelyStaticServer && isLoopback) {
-            bases.push('http://localhost:3000');
-        }
-        bases.push('');
-
-        return [...new Set(bases)];
-    }
-    const API_BASES = resolveApiBases();
-
-    function getApiUrls(path) {
-        return API_BASES.map((base) => (base ? `${base}${path}` : path));
-    }
-
-    function setAnalyzeLoading(isLoading) {
-        if (!btnAnalyze) return;
-        btnAnalyze.classList.toggle('loading', isLoading);
-        btnAnalyze.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-        btnAnalyze.disabled = isLoading;
-    }
-
-    function showAnalyzeError(message) {
-        alert(message || 'Failed to analyze resume.');
-    }
-
-    function fillList(id, items) {
-        const list = document.getElementById(id);
-        if (!list) return;
-        list.innerHTML = '';
-        (items || []).forEach(function(item) {
-            const li = document.createElement('li');
-            li.textContent = item;
-            list.appendChild(li);
->>>>>>> ecfb2b2b85eb9adfb2c460a9b734b33e007023bc
         });
     }
 

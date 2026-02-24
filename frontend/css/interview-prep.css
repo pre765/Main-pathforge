@@ -971,3 +971,139 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Mock Interview AI ===== */
+.mock-interview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mock-interview-panel,
+.mock-heatmap-panel {
+    background: rgba(9, 13, 24, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.mock-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.mock-question-block {
+    margin-bottom: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.mock-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.mock-question-text {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.mock-answer-block textarea {
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 12px;
+    padding: 12px;
+    background: rgba(8, 12, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.mock-feedback {
+    margin-top: 16px;
+}
+
+.mock-feedback-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.mock-feedback-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mock-score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.mock-score-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+}
+
+.heatmap-grid {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.heatmap-row {
+    display: grid;
+    grid-template-columns: 140px repeat(8, 1fr);
+    gap: 6px;
+    align-items: center;
+}
+
+.heatmap-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.heatmap-cell {
+    width: 100%;
+    height: 22px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.heatmap-legend {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.heatmap-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.heatmap-legend .legend-swatch {
+    width: 16px;
+    height: 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 700px) {
+    .heatmap-row {
+        grid-template-columns: 110px repeat(4, 1fr);
+    }
+}

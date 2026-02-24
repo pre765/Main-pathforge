@@ -14,11 +14,13 @@ const authRoutes = require("./routes/authRoutes");
 const guiderRoutes = require("./routes/guiderRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/guider", guiderRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/resume", resumeRoutes);
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 

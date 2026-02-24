@@ -301,3 +301,92 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     opacity: 0.6;
     color: var(--text-muted);
 }
+
+/* ===== Roadmap Auto-Builder ===== */
+.roadmap-auto {
+    margin: 20px auto 30px;
+    width: min(960px, 92%);
+    background: rgba(12, 16, 28, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(4, 10, 20, 0.4);
+}
+
+.roadmap-auto-header h2 {
+    margin: 0;
+}
+
+.roadmap-auto-header p {
+    margin: 6px 0 0;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.roadmap-auto-form {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 2fr 120px 180px auto;
+    gap: 12px;
+}
+
+.roadmap-auto-form input,
+.roadmap-auto-form select {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(8, 12, 20, 0.7);
+    color: #fff;
+}
+
+.roadmap-auto-form .auto-btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #29d3a0, #2ba8ff);
+    color: #0b0f1a;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.roadmap-auto-results {
+    margin-top: 20px;
+    display: grid;
+    gap: 14px;
+}
+
+.auto-week-card {
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auto-week-card h4 {
+    margin: 0 0 8px;
+}
+
+.auto-week-card ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.auto-week-courses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.auto-course-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(41, 211, 160, 0.18);
+    color: #29d3a0;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+    .roadmap-auto-form {
+        grid-template-columns: 1fr;
+    }
+}

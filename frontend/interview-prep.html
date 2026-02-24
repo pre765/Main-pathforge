@@ -205,7 +205,6 @@
                         <div class="rp-step"><span>Step 4</span><strong>Mock Interview</strong></div>
                     </div>
 
-<<<<<<< HEAD
                     <div class="rp-top-grid">
                         <section class="card-section rp-main-panel" aria-labelledby="rp-hero-title">
                             <div class="rp-title-row">
@@ -243,38 +242,6 @@
                                         Job Description
                                     </label>
                                     <textarea id="jd-text" placeholder="Paste the full job description here..."></textarea>
-=======
-                        <!-- Paste Method (Default) -->
-                        <div class="input-row" id="paste-method">
-                            <div class="input-group-hero">
-                                <label for="resume-text">Resume</label>
-                                <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
-                            </div>
-                            <div class="input-group-hero">
-                                <label for="jd-text">Job Description</label>
-                                <textarea id="jd-text" placeholder="Paste the job description here..."></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Upload Method (Hidden by default) -->
-                        <div id="upload-method" style="display: none;">
-                            <div class="input-group-hero">
-                                <label>Upload Resume (PDF only)</label>
-                                <div class="upload-zone" id="resume-upload-zone">
-                                    <div class="upload-icon">📄</div>
-                                    <div class="upload-zone-text">Drag your resume here</div>
-                                    <div class="upload-zone-hint">or click to browse</div>
-                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,application/pdf">
-                                </div>
-                            </div>
-                            <div class="input-group-hero">
-                                <label>Job Description Text (Required)</label>
-                                <div class="upload-zone" id="jd-upload-zone">
-                                    <div class="upload-icon">📋</div>
-                                    <div class="upload-zone-text">Drag job description .txt here</div>
-                                    <div class="upload-zone-hint">or paste into "Job Description" textbox</div>
-                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".txt,text/plain">
->>>>>>> ecfb2b2b85eb9adfb2c460a9b734b33e007023bc
                                 </div>
                             </div>
 
@@ -548,9 +515,61 @@
             <section class="prep-section" id="section-mock-interview">
                 <div class="mock-interview-container">
                     <h2>Mock Interview</h2>
-                    <div class="mock-interview-placeholder">
-                        <p>Mock interview feature coming soon!</p>
-                        <p class="placeholder-desc">Practice your interview skills with AI-powered mock interviews.</p>
+                    <div class="mock-interview-grid">
+                        <div class="mock-interview-panel">
+                            <div class="mock-controls">
+                                <div class="select-group">
+                                    <label for="ai-mock-domain">Domain</label>
+                                    <select id="ai-mock-domain">
+                                        <option value="Web Development">Web Development</option>
+                                        <option value="AI/ML">AI/ML</option>
+                                        <option value="Data Science">Data Science</option>
+                                        <option value="Cybersecurity">Cybersecurity</option>
+                                    </select>
+                                </div>
+                                <div class="select-group">
+                                    <label for="ai-mock-type">Interview Type</label>
+                                    <select id="ai-mock-type">
+                                        <option value="technical">Technical</option>
+                                        <option value="behavioral">Behavioral</option>
+                                        <option value="hr">HR</option>
+                                    </select>
+                                </div>
+                                <div class="select-group">
+                                    <label for="ai-mock-difficulty">Difficulty</label>
+                                    <select id="ai-mock-difficulty">
+                                        <option value="easy">Easy</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mock-question-block">
+                                <div class="mock-question-header">
+                                    <h3>Question</h3>
+                                    <button type="button" class="btn-download-resume" id="btn-generate-question">Generate Question</button>
+                                </div>
+                                <p class="mock-question-text" id="mock-question-text">Click “Generate Question” to begin.</p>
+                            </div>
+                            <div class="mock-answer-block">
+                                <label for="mock-answer">Your Answer</label>
+                                <textarea id="mock-answer" rows="6" placeholder="Write your response here..."></textarea>
+                            </div>
+                            <button type="button" class="btn-analyze" id="btn-score-answer">Score Answer</button>
+                            <div class="mock-feedback" id="ai-mock-feedback" hidden>
+                                <h3>AI Feedback</h3>
+                                <p id="ai-mock-summary"></p>
+                                <ul class="mock-feedback-list" id="ai-mock-strengths"></ul>
+                                <ul class="mock-feedback-list" id="ai-mock-improvements"></ul>
+                                <div class="mock-score-grid" id="ai-mock-score-grid"></div>
+                            </div>
+                        </div>
+                        <div class="mock-heatmap-panel">
+                            <h3>Interview Feedback Heatmap</h3>
+                            <p class="placeholder-desc">Track competency scores across your latest attempts.</p>
+                            <div class="heatmap-grid" id="ai-heatmap-grid"></div>
+                            <div class="heatmap-legend" id="ai-heatmap-legend"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -559,10 +578,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
     <script src="js/three-scene.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/interview-prep-enhancements.js"></script>
     <script src="js/interview-prep.js"></script>
+    <script src="js/interview-sim.js"></script>
 </body>
 </html>
-
-
