@@ -6,6 +6,8 @@ const {
   selectDomain,
   getRoadmapProgress,
   toggleRoadmapItem,
+  getRecommendedCourses,
+  toggleCourseCompletion,
   getCommunityGuiders,
   requestGuiderConnection,
   getMyConnections,
@@ -33,6 +35,8 @@ router.get("/me", protect, getProfile);
 router.put("/domain", protect, selectDomain);
 router.get("/roadmap-progress", protect, getRoadmapProgress);
 router.patch("/roadmap-progress", protect, toggleRoadmapItem);
+router.get("/recommended-courses", protect, getRecommendedCourses);
+router.patch("/recommended-courses", protect, toggleCourseCompletion);
 router.get("/community/guiders", protect, getCommunityGuiders);
 router.post("/community/connect/:guiderId", protect, requestGuiderConnection);
 router.get("/community/connections", protect, getMyConnections);
@@ -41,4 +45,3 @@ router.get("/community/posts", protect, getCommunityPosts);
 router.post("/community/posts/:postId/comments", protect, addCommunityComment);
 
 module.exports = router;
-

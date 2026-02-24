@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const { ROADMAPS, buildRoadmapItems } = require("../config/roadmaps");
+const { RECOMMENDED_COURSES, getCourseIndex } = require("../config/recommendedCourses");
 const Connection = require("../models/connection");
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
@@ -155,6 +156,121 @@ exports.toggleRoadmapItem = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getRecommendedCourses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const requestedDomain = req.query.domain;
+    const domain =
+      requestedDomain && RECOMMENDED_COURSES[requestedDomain]
+        ? requestedDomain
+        : user.selectedDomain;
+
+    const completedSet = new Set(user.completedCourseIds || []);
+
+    if (domain && RECOMMENDED_COURSES[domain]) {
+      const courses = RECOMMENDED_COURSES[domain].map((course) => ({
+        ...course,
+        domain,
+        completed: completedSet.has(course.id)
+      }));
+      const completedCount = courses.filter((c) => c.completed).length;
+      return res.status(200).json({
+        success: true,
+        data: {
+          mode: "single",
+          domain,
+          total: courses.length,
+          completedCount,
+          progressPercentage: courses.length
+            ? Math.round((completedCount / courses.length) * 100)
+            : 0,
+          courses
+        }
+      });
+    }
+
+    const allDomains = Object.keys(RECOMMENDED_COURSES);
+    const domains = allDomains.map((key) => {
+      const courses = RECOMMENDED_COURSES[key].map((course) => ({
+        ...course,
+        domain: key,
+        completed: completedSet.has(course.id)
+      }));
+      const completedCount = courses.filter((c) => c.completed).length;
+      return {
+        domain: key,
+        total: courses.length,
+        completedCount,
+        progressPercentage: courses.length
+          ? Math.round((completedCount / courses.length) * 100)
+          : 0,
+        courses
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        mode: "all",
+        domains
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.toggleCourseCompletion = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: "courseId is required" });
+    }
+
+    const index = getCourseIndex();
+    if (!index.has(courseId)) {
+      return res.status(400).json({ success: false, message: "Invalid courseId" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const completedSet = new Set(user.completedCourseIds || []);
+    if (completedSet.has(courseId)) {
+      completedSet.delete(courseId);
+    } else {
+      completedSet.add(courseId);
+    }
+    user.completedCourseIds = Array.from(completedSet);
+    await user.save();
+
+    const course = index.get(courseId);
+    const domainCourses = RECOMMENDED_COURSES[course.domain] || [];
+    const completedCount = domainCourses.filter((c) => completedSet.has(c.id)).length;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        completedCourseIds: user.completedCourseIds,
+        domain: course.domain,
+        total: domainCourses.length,
+        completedCount,
+        progressPercentage: domainCourses.length
+          ? Math.round((completedCount / domainCourses.length) * 100)
+          : 0
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

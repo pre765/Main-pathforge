@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
   completedRoadmapItems: {
     type: [String],
     default: []
+  },
+  completedCourseIds: {
+    type: [String],
+    default: []
   }
 }, { timestamps: true });
 
