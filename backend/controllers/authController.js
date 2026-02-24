@@ -27,6 +27,25 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const OTP_EXP_MINUTES = Number(process.env.OTP_EXP_MINUTES || 10);
 const OTP_RESEND_SECONDS = Number(process.env.OTP_RESEND_SECONDS || 60);
 const OTP_MAX_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5);
+const ROLE_OPTIONS = new Set(["student", "guider"]);
+const DOMAIN_OPTIONS = new Set(["AI/ML", "Cybersecurity", "Web Development", "Data Science"]);
+const SKILL_OPTIONS = new Set(["beginner", "intermediate", "advanced"]);
+
+const normalizeRole = (role) => {
+  const value = String(role || "").toLowerCase();
+  return ROLE_OPTIONS.has(value) ? value : "student";
+};
+
+const normalizeDomain = (domain) => {
+  if (!domain) return null;
+  return DOMAIN_OPTIONS.has(domain) ? domain : null;
+};
+
+const normalizeSkill = (skill) => {
+  if (!skill) return "beginner";
+  const value = String(skill || "").toLowerCase();
+  return SKILL_OPTIONS.has(value) ? value : "beginner";
+};
 
 const withTimeout = (promise, ms = 4000) =>
   Promise.race([
@@ -36,8 +55,11 @@ const withTimeout = (promise, ms = 4000) =>
     })
   ]);
 
+const ENABLE_EMAIL_DNS_CHECK = process.env.EMAIL_DNS_CHECK !== "false";
+
 const hasValidEmailDomain = async (email) => {
   if (!EMAIL_REGEX.test(email)) return false;
+  if (!ENABLE_EMAIL_DNS_CHECK) return true;
 
   const domain = email.split("@")[1];
   if (!domain) return false;
@@ -118,8 +140,11 @@ const sendOtpEmail = async (email, code) => {
 
 exports.requestSignupOtp = async (req, res) => {
   try {
-    const { name, email, password, selectedDomain, skillLevel } = req.body;
+    const { name, email, password, selectedDomain, skillLevel, role } = req.body;
     const normalizedEmail = (email || "").toLowerCase().trim();
+    const normalizedRole = normalizeRole(role);
+    const normalizedDomain = normalizeDomain(selectedDomain);
+    const normalizedSkill = normalizeSkill(skillLevel);
 
     if (!name || !normalizedEmail || !password) {
       return res.status(400).json({
@@ -139,7 +164,7 @@ exports.requestSignupOtp = async (req, res) => {
     if (!isValidEmailDomain) {
       return res.status(400).json({
         success: false,
-        message: "Email does not exist or domain is invalid"
+        message: "Email domain looks invalid. Please use a real email."
       });
     }
 
@@ -176,8 +201,9 @@ exports.requestSignupOtp = async (req, res) => {
         email: normalizedEmail,
         name: name.trim(),
         passwordHash,
-        selectedDomain,
-        skillLevel,
+        role: normalizedRole,
+        selectedDomain: normalizedDomain,
+        skillLevel: normalizedSkill,
         otpHash,
         otpExpiresAt,
         attempts: 0,
@@ -260,7 +286,7 @@ exports.verifySignupOtp = async (req, res) => {
       name: pending.name,
       email: pending.email,
       password: pending.passwordHash,
-      role: "student",
+      role: pending.role || "student",
       selectedDomain: pending.selectedDomain,
       skillLevel: pending.skillLevel || "beginner"
     });

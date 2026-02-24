@@ -2,6 +2,7 @@
 // Added a simple comment
 const STORAGE_KEY = 'auth_portal_users';
 const SESSION_KEY = 'auth_portal_session';
+const TOKEN_KEY = 'auth_portal_token';
 
 function getUsers() {
     try {
@@ -14,6 +15,50 @@ function getUsers() {
 
 function saveUsers(users) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+}
+
+function setAuthToken(token) {
+    if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+    } else {
+        localStorage.removeItem(TOKEN_KEY);
+    }
+}
+
+function getAuthToken() {
+    try {
+        return localStorage.getItem(TOKEN_KEY);
+    } catch {
+        return null;
+    }
+}
+
+function upsertUserRecord(user) {
+    if (!user || !user.email) return null;
+    const users = getUsers();
+    const key = user.email.toLowerCase().trim();
+    const existing = users[key] || {};
+    users[key] = {
+        ...existing,
+        name: user.name || existing.name || 'User',
+        email: key,
+        role: user.role || existing.role || 'student',
+        selectedDomain: user.selectedDomain || existing.selectedDomain || '',
+        skillLevel: user.skillLevel || existing.skillLevel || '',
+        joinedAt: existing.joinedAt || new Date().toISOString(),
+        progress: existing.progress || getDefaultProgress(),
+    };
+    saveUsers(users);
+    return users[key];
+}
+
+function oauthSignIn(user, token) {
+    const record = upsertUserRecord(user);
+    if (!record) return false;
+    const session = { email: record.email, name: record.name, role: record.role };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    if (token) setAuthToken(token);
+    return true;
 }
 
 function signUp(name, email, password, bio) {
@@ -75,6 +120,7 @@ function logIn(email, password) {
 
 function logOut() {
     localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(TOKEN_KEY);
 }
 
 function signOut() {

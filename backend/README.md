@@ -30,6 +30,7 @@ SMTP_FROM=PathForge <your-email@gmail.com>
 OTP_EXP_MINUTES=10
 OTP_RESEND_SECONDS=60
 OTP_MAX_ATTEMPTS=5
+EMAIL_DNS_CHECK=true
 ```
 
 If you use MongoDB Atlas, `MONGO_URI` should look like:
