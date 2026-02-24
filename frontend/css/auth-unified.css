@@ -448,6 +448,21 @@
   gap: var(--space-3);
 }
 
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.google-btn iframe {
+  border-radius: 999px;
+}
+
+.google-btn > div {
+  width: 100% !important;
+}
+
 .auth-footer {
   margin-top: var(--space-6);
   text-align: center;
@@ -455,6 +470,32 @@
 
 .auth-footer .link-muted {
   font-size: var(--text-sm);
+}
+
+.otp-panel {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: 16px;
+  background: rgba(8, 12, 20, 0.35);
+  border: 1px solid var(--border-default);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.otp-panel.hidden {
+  display: none;
+}
+
+.otp-note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.otp-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* ----- Mentor Fields Animation ----- */

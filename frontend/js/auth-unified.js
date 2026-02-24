@@ -15,6 +15,11 @@
   const createPassword = document.getElementById('create-password');
   const strengthFill = document.getElementById('password-strength-fill');
   const strengthLabel = document.getElementById('password-strength-label');
+  const otpPanel = document.getElementById('otp-panel');
+  const otpCodeInput = document.getElementById('otp-code');
+  const otpNote = document.getElementById('otp-note');
+  const otpVerifyBtn = document.getElementById('otp-verify-btn');
+  const otpResendBtn = document.getElementById('otp-resend-btn');
 
   /* ----- Tab switch ----- */
   function showPanel(panel) {
@@ -128,11 +133,7 @@
     e.preventDefault();
     const email = document.getElementById('signin-email').value.trim();
     const password = document.getElementById('signin-password').value;
-    if (!logIn(email, password)) {
-      alert('Invalid email or password.');
-      return;
-    }
-    window.location.href = 'profile.html';
+    handleLogin(email, password);
   });
 
   /* ----- Create Account ----- */
@@ -148,16 +149,298 @@
       const domain = document.getElementById('create-domain').value;
       const expertise = document.getElementById('create-expertise').value;
       const years = document.getElementById('create-years').value;
-      if (!signUpMentor(name, email, password, { domain, expertise, bio, years })) {
-        alert('This email is already registered. Please sign in instead.');
-        return;
-      }
+      requestSignupOtp({
+        name,
+        email,
+        password,
+        bio,
+        role,
+        domain,
+        expertise,
+        years,
+      });
     } else {
-      if (!signUp(name, email, password, bio)) {
-        alert('This email is already registered. Please sign in instead.');
+      requestSignupOtp({
+        name,
+        email,
+        password,
+        bio,
+        role,
+      });
+    }
+  });
+
+  /* ----- Google Sign In ----- */
+  const config = window.PathForgeConfig || {};
+  const apiBaseUrl = config.apiBaseUrl || 'http://localhost:5000/api';
+  const googleClientId = config.googleClientId;
+  const googleSignInBtn = document.getElementById('google-signin-btn');
+  const googleSignUpBtn = document.getElementById('google-signup-btn');
+  let googleRedirectTarget = 'profile.html';
+
+  if (googleSignInBtn) {
+    googleSignInBtn.addEventListener('click', () => {
+      googleRedirectTarget = 'profile.html';
+    });
+  }
+
+  if (googleSignUpBtn) {
+    googleSignUpBtn.addEventListener('click', () => {
+      googleRedirectTarget = 'path-select.html';
+    });
+  }
+
+  async function postJson(url, payload) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Request failed');
+    }
+    return data;
+  }
+
+  async function handleGoogleCredential(response) {
+    if (!response || !response.credential) {
+      alert('Google sign-in failed.');
+      return;
+    }
+
+    try {
+      const data = await postJson(`${apiBaseUrl}/auth/google`, {
+        idToken: response.credential,
+      });
+
+      const user = data.data || {};
+      const token = data.token;
+      const ok = oauthSignIn(
+        {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          selectedDomain: user.selectedDomain,
+          skillLevel: user.skillLevel,
+        },
+        token
+      );
+
+      if (!ok) {
+        throw new Error('Unable to create session');
+      }
+
+      window.location.href = googleRedirectTarget;
+    } catch (err) {
+      alert(err.message || 'Google authentication failed.');
+    }
+  }
+
+  function initGoogleButtons(retry = 0) {
+    if (!googleSignInBtn && !googleSignUpBtn) return;
+
+    if (!googleClientId) {
+      if (googleSignInBtn) googleSignInBtn.textContent = 'Google not configured';
+      if (googleSignUpBtn) googleSignUpBtn.textContent = 'Google not configured';
+      return;
+    }
+
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      if (retry < 10) {
+        setTimeout(() => initGoogleButtons(retry + 1), 300);
+      }
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleGoogleCredential,
+    });
+
+    const buttonOptions = {
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      shape: 'pill',
+      logo_alignment: 'left',
+      width: 240,
+    };
+
+    if (googleSignInBtn) {
+      window.google.accounts.id.renderButton(googleSignInBtn, buttonOptions);
+    }
+    if (googleSignUpBtn) {
+      window.google.accounts.id.renderButton(googleSignUpBtn, buttonOptions);
+    }
+  }
+
+  window.addEventListener('load', () => initGoogleButtons());
+
+  /* ----- API auth (email/password + OTP) ----- */
+  let pendingSignup = null;
+
+  function isEmailValid(email) {
+    return /@/.test(String(email || ''));
+  }
+
+  function normalizeRole(role) {
+    return role === 'mentor' ? 'guider' : 'student';
+  }
+
+  function normalizeDomain(raw) {
+    if (!raw) return null;
+    const map = {
+      'Web Development': 'Web Development',
+      'AIML': 'AI/ML',
+      'AI/ML': 'AI/ML',
+      'Cyber Security': 'Cybersecurity',
+      'Cybersecurity': 'Cybersecurity',
+      'Data Science': 'Data Science',
+    };
+    return map[raw] || null;
+  }
+
+  function normalizeSkillLevel(raw) {
+    if (!raw) return null;
+    const val = String(raw).toLowerCase();
+    if (val === 'beginner' || val === 'intermediate' || val === 'advanced') return val;
+    return null;
+  }
+
+  function setOtpVisible(visible, message) {
+    if (!otpPanel) return;
+    otpPanel.classList.toggle('hidden', !visible);
+    if (message && otpNote) otpNote.textContent = message;
+  }
+
+  async function handleLogin(email, password) {
+    if (!email || !password) {
+      alert('Email and password are required.');
+      return;
+    }
+    if (!isEmailValid(email)) {
+      alert('Please enter an email address.');
+      return;
+    }
+
+    try {
+      const data = await postJson(`${apiBaseUrl}/auth/login`, { email, password });
+      const user = data.data || {};
+      const token = data.token;
+      const ok = oauthSignIn(
+        {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          selectedDomain: user.selectedDomain,
+          skillLevel: user.skillLevel,
+        },
+        token
+      );
+      if (!ok) throw new Error('Unable to create session');
+      window.location.href = 'profile.html';
+    } catch (err) {
+      alert(err.message || 'Invalid email or password.');
+    }
+  }
+
+  async function requestSignupOtp(payload) {
+    const { name, email, password, role } = payload;
+
+    if (!name || !email || !password) {
+      alert('Name, email, and password are required.');
+      return;
+    }
+    if (!isEmailValid(email)) {
+      alert('Please enter an email address.');
+      return;
+    }
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return;
+    }
+
+    const normalizedRole = normalizeRole(role);
+    const selectedDomain = normalizeDomain(payload.domain);
+    const skillLevel = normalizeSkillLevel(payload.expertise);
+
+    try {
+      await postJson(`${apiBaseUrl}/auth/register/request-otp`, {
+        name,
+        email,
+        password,
+        role: normalizedRole,
+        selectedDomain,
+        skillLevel,
+      });
+
+      pendingSignup = {
+        email,
+        role: normalizedRole,
+        redirectTo: normalizedRole === 'guider' ? 'profile.html' : 'path-select.html',
+      };
+      setOtpVisible(true, `Verification code sent to ${email}.`);
+      if (otpCodeInput) otpCodeInput.focus();
+    } catch (err) {
+      alert(err.message || 'Failed to send verification code.');
+    }
+  }
+
+  async function verifySignupOtp() {
+    if (!pendingSignup) {
+      alert('Please request a verification code first.');
+      return;
+    }
+    const otp = otpCodeInput ? otpCodeInput.value.trim() : '';
+    if (!otp) {
+      alert('Enter the verification code.');
+      return;
+    }
+
+    try {
+      const data = await postJson(`${apiBaseUrl}/auth/register/verify-otp`, {
+        email: pendingSignup.email,
+        otp,
+      });
+
+      const user = data.data || {};
+      const token = data.token;
+      const ok = oauthSignIn(
+        {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          selectedDomain: user.selectedDomain,
+          skillLevel: user.skillLevel,
+        },
+        token
+      );
+      if (!ok) throw new Error('Unable to create session');
+      window.location.href = pendingSignup.redirectTo;
+    } catch (err) {
+      alert(err.message || 'Verification failed.');
+    }
+  }
+
+  if (otpVerifyBtn) {
+    otpVerifyBtn.addEventListener('click', verifySignupOtp);
+  }
+
+  if (otpResendBtn) {
+    otpResendBtn.addEventListener('click', () => {
+      if (!pendingSignup) {
+        alert('Please fill the form and request a code first.');
         return;
       }
-    }
-    window.location.href = role === 'mentor' ? 'profile.html' : 'path-select.html';
-  });
+      const name = document.getElementById('create-name').value.trim();
+      const email = document.getElementById('create-email').value.trim();
+      const password = document.getElementById('create-password').value;
+      const role = createRoleInput.value;
+      const domain = document.getElementById('create-domain')?.value;
+      const expertise = document.getElementById('create-expertise')?.value;
+      const years = document.getElementById('create-years')?.value;
+      requestSignupOtp({ name, email, password, role, domain, expertise, years });
+    });
+  }
 })();

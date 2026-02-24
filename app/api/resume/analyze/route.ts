@@ -2,6 +2,27 @@ import { NextResponse } from "next/server";
 import { techDictionary } from "@/utils/techDictionary";
 import { roadmapMap } from "@/utils/roadmapMap";
 
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+};
+
+function jsonResponse(body: unknown, init: ResponseInit = {}) {
+  return new NextResponse(JSON.stringify(body), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders,
+      ...(init.headers || {})
+    }
+  });
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
 type AnalyzeRequestBody = {
   resumeText: string;
   jobDescription: string;
@@ -173,7 +194,7 @@ export async function POST(request: Request) {
     const jobDescription = body.jobDescription ?? "";
 
     if (!resumeText || !jobDescription) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: "resumeText and jobDescription are required." },
         { status: 400 }
       );
@@ -347,7 +368,7 @@ export async function POST(request: Request) {
         `Emphasize outcomes with metrics, showcase relevant projects, and surface experience that matches the required skills.`;
     }
 
-    return NextResponse.json({
+    return jsonResponse({
       finalScore: atsScore,
       readinessLevel,
       requiredSkillScore: Number(requiredSkillScore.toFixed(2)),
@@ -367,6 +388,6 @@ export async function POST(request: Request) {
       improvedResumeSuggestion
     });
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    return jsonResponse({ error: "Invalid request body." }, { status: 400 });
   }
 }

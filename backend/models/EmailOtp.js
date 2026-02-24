@@ -18,6 +18,11 @@ const emailOtpSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    role: {
+      type: String,
+      enum: ["student", "guider"],
+      default: "student"
+    },
     selectedDomain: {
       type: String,
       enum: ["AI/ML", "Cybersecurity", "Web Development", "Data Science"],

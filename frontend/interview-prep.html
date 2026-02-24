@@ -205,6 +205,7 @@
                         <div class="rp-step"><span>Step 4</span><strong>Mock Interview</strong></div>
                     </div>
 
+<<<<<<< HEAD
                     <div class="rp-top-grid">
                         <section class="card-section rp-main-panel" aria-labelledby="rp-hero-title">
                             <div class="rp-title-row">
@@ -242,6 +243,38 @@
                                         Job Description
                                     </label>
                                     <textarea id="jd-text" placeholder="Paste the full job description here..."></textarea>
+=======
+                        <!-- Paste Method (Default) -->
+                        <div class="input-row" id="paste-method">
+                            <div class="input-group-hero">
+                                <label for="resume-text">Resume</label>
+                                <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
+                            </div>
+                            <div class="input-group-hero">
+                                <label for="jd-text">Job Description</label>
+                                <textarea id="jd-text" placeholder="Paste the job description here..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Upload Method (Hidden by default) -->
+                        <div id="upload-method" style="display: none;">
+                            <div class="input-group-hero">
+                                <label>Upload Resume (PDF only)</label>
+                                <div class="upload-zone" id="resume-upload-zone">
+                                    <div class="upload-icon">📄</div>
+                                    <div class="upload-zone-text">Drag your resume here</div>
+                                    <div class="upload-zone-hint">or click to browse</div>
+                                    <input type="file" id="resume-upload-input" class="upload-input-hidden" accept=".pdf,application/pdf">
+                                </div>
+                            </div>
+                            <div class="input-group-hero">
+                                <label>Job Description Text (Required)</label>
+                                <div class="upload-zone" id="jd-upload-zone">
+                                    <div class="upload-icon">📋</div>
+                                    <div class="upload-zone-text">Drag job description .txt here</div>
+                                    <div class="upload-zone-hint">or paste into "Job Description" textbox</div>
+                                    <input type="file" id="jd-upload-input" class="upload-input-hidden" accept=".txt,text/plain">
+>>>>>>> ecfb2b2b85eb9adfb2c460a9b734b33e007023bc
                                 </div>
                             </div>
 
