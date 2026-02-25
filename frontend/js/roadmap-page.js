@@ -48,6 +48,8 @@
     if (user && Array.isArray(user.completedRoadmap)) {
         user.completedRoadmap.forEach(id => completed.add(Number(id)));
     }
+    // ensure roadmap subtopic progress structure exists
+    if (!user.completedSubtopics) user.completedSubtopics = {};
 
     const container = document.getElementById('roadmap');
     const modal = document.getElementById('node-modal');
@@ -150,9 +152,50 @@
             if (topics.length) {
                 const list = document.createElement('ul');
                 list.className = 'roadmap-stage-tooltip-list';
-                topics.forEach(t => {
+                topics.forEach((t, ti) => {
                     const li = document.createElement('li');
-                    li.textContent = t;
+
+                    const labelEl = document.createElement('label');
+                    labelEl.className = 'roadmap-tooltip-topic-label';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'roadmap-tooltip-topic-checkbox';
+
+                    const moduleNumber = i + 1;
+                    const pathKey = tooltipMeta.pathKey;
+                    if (!user.completedSubtopics[pathKey]) {
+                        user.completedSubtopics[pathKey] = {};
+                    }
+                    const subKey = pathKey + '_' + String(moduleNumber) + '_' + String(ti);
+                    const isDone =
+                        user.completedSubtopics[pathKey] &&
+                        user.completedSubtopics[pathKey][subKey];
+                    checkbox.checked = !!isDone;
+
+                    checkbox.addEventListener('change', (ev) => {
+                        const done = ev.target.checked;
+                        const users = getUsers();
+                        if (!user.completedSubtopics[pathKey]) {
+                            user.completedSubtopics[pathKey] = {};
+                        }
+                        if (done) {
+                            user.completedSubtopics[pathKey][subKey] = true;
+                        } else {
+                            delete user.completedSubtopics[pathKey][subKey];
+                        }
+                        if (users[user.email]) {
+                            users[user.email].completedSubtopics = user.completedSubtopics;
+                            saveUsers(users);
+                        }
+                    });
+
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = t;
+
+                    labelEl.appendChild(checkbox);
+                    labelEl.appendChild(textSpan);
+                    li.appendChild(labelEl);
                     list.appendChild(li);
                 });
                 tooltip.appendChild(list);
