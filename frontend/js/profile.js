@@ -1,16 +1,11 @@
 /* Profile page - load user data and render charts (multi-path support) */
 (function() {
-<<<<<<< HEAD
-    // Check if viewing another user's profile
     const urlParams = new URLSearchParams(window.location.search);
     const viewingProfileEmail = urlParams.get('profile');
-    
     const currentUser = getFullUser();
     const users = getUsers();
-    
-    let user = currentUser;
 
-    // If viewing another user, load their profile
+    let user = currentUser;
     if (viewingProfileEmail && currentUser) {
         const viewedUser = users[decodeURIComponent(viewingProfileEmail)];
         if (!viewedUser) {
@@ -20,10 +15,7 @@
         }
         user = viewedUser;
     }
-=======
-    const user = getFullUser();
     const API_BASE = (localStorage.getItem('pathforge_api_base') || 'http://localhost:5000').replace(/\/$/, '');
->>>>>>> 13fc30d (resume analysis added)
 
     function redirectToLogin() {
         window.location.href = 'login.html';
@@ -71,28 +63,70 @@
     document.getElementById('profile-name').textContent = user.name;
     document.getElementById('profile-email').textContent = user.email;
 
-    // Calculate completed topics based on ticked subtopics
-    if (!user.completedSubtopics) user.completedSubtopics = {};
-    let totalCompleted = 0;
-    let totalTopics = 0;
     const roadmapsData = getRoadmapsData();
-    
-    paths.forEach((pathName) => {
+    const checklistState = JSON.parse(localStorage.getItem('roadmap_checklist_v1') || '{}');
+    if (!user.completedSubtopics) user.completedSubtopics = {};
+
+    function getPathAliases(pathName) {
+        const aliases = [pathName];
+        if (pathName === 'Web Development') aliases.push('frontend');
+        if (pathName === 'AIML' || pathName === 'AI/ML') aliases.push('aiml');
+        if (pathName === 'Cyber Security') aliases.push('cybersecurity');
+        if (pathName === 'Data Science') aliases.push('datascience');
+        if (pathName === 'Cloud Computing') aliases.push('cloud');
+        const legacySelectedPath = localStorage.getItem('selectedPath');
+        if (legacySelectedPath) aliases.push(legacySelectedPath);
+        return Array.from(new Set(aliases));
+    }
+
+    function getModuleTopics(pathName, moduleIndex, aliases) {
+        const moduleNumber = moduleIndex + 1;
+        for (const alias of aliases) {
+            const mapped = window.roadmapTopics && window.roadmapTopics[alias] && window.roadmapTopics[alias][moduleNumber];
+            if (Array.isArray(mapped) && mapped.length) return mapped;
+        }
         const phases = roadmapsData[pathName] || roadmapsData['General'] || [];
-        phases.forEach((phase) => {
-            if (phase.subSteps && phase.subSteps.length) {
-                totalTopics += phase.subSteps.length;
-                phase.subSteps.forEach((_, subIdx) => {
-                    const key = pathName + '_' + phase.phase + '_' + subIdx;
-                    if (user.completedSubtopics[pathName] && user.completedSubtopics[pathName][key]) {
-                        totalCompleted++;
-                    }
-                });
-            }
+        const fallback = phases[moduleIndex] && phases[moduleIndex].subSteps;
+        return Array.isArray(fallback) ? fallback : [];
+    }
+
+    function isTopicCompleted(aliases, moduleNumber, topic, topicIndex) {
+        return aliases.some((alias) => {
+            const fromChecklist =
+                !!(checklistState[alias] && checklistState[alias][moduleNumber] && checklistState[alias][moduleNumber][topic]);
+            const topicKey = `${alias}_${moduleNumber}_${topicIndex}`;
+            const fromSubtopics =
+                !!(user.completedSubtopics[alias] && user.completedSubtopics[alias][topicKey]);
+            return fromChecklist || fromSubtopics;
         });
+    }
+
+    const pathProgress = paths.map((pathName) => {
+        const aliases = getPathAliases(pathName);
+        const phases = roadmapsData[pathName] || roadmapsData['General'] || [];
+        let completed = 0;
+        let total = 0;
+        phases.forEach((_, moduleIndex) => {
+            const moduleNumber = moduleIndex + 1;
+            const topics = getModuleTopics(pathName, moduleIndex, aliases);
+            topics.forEach((topic, topicIndex) => {
+                total += 1;
+                if (isTopicCompleted(aliases, moduleNumber, topic, topicIndex)) completed += 1;
+            });
+        });
+        return {
+            pathName,
+            completed,
+            total,
+            pct: total ? Math.round((completed / total) * 100) : 0,
+        };
     });
 
-    document.getElementById('stat-courses').textContent = totalCompleted + '/' + totalTopics;
+    const totalCompleted = pathProgress.reduce((sum, item) => sum + item.completed, 0);
+    const totalTopics = pathProgress.reduce((sum, item) => sum + item.total, 0);
+    const totalPct = totalTopics ? Math.round((totalCompleted / totalTopics) * 100) : 0;
+
+    document.getElementById('stat-courses').textContent = `${totalCompleted}/${totalTopics}`;
 
     if (user.joinedAt) {
         const date = new Date(user.joinedAt);
@@ -100,7 +134,6 @@
             date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     }
 
-    const totalPct = totalTopics ? Math.round((totalCompleted / totalTopics) * 100) : 0;
     const level =
         totalPct >= 80 ? 'Expert' : totalPct >= 50 ? 'Intermediate' : 'Beginner';
     document.getElementById('user-level').textContent = level;
@@ -641,34 +674,14 @@
         'rgba(0, 255, 200, 0.2)',
     ];
 
-    /* Pie Chart - Path focus distribution (completed topics per path) */
-    const pathCompleted = paths.map((p) => {
-        let completed = 0;
-        let total = 0;
-        const phases = roadmapsData[p] || roadmapsData['General'] || [];
-        if (user.completedSubtopics[p]) {
-            phases.forEach((phase) => {
-                if (phase.subSteps && phase.subSteps.length) {
-                    total += phase.subSteps.length;
-                    phase.subSteps.forEach((_, subIdx) => {
-                        const key = p + '_' + phase.phase + '_' + subIdx;
-                        if (user.completedSubtopics[p][key]) completed++;
-                    });
-                }
-            });
-        }
-        return { label: p, value: completed, total: total };
-    });
-    const totalCompletedAll = pathCompleted.reduce((s, p) => s + p.value, 0);
-
     new Chart(document.getElementById('pie-chart'), {
         type: 'doughnut',
         data: {
-            labels: pathCompleted.map((p) => p.label),
+            labels: ['Completed', 'Remaining'],
             datasets: [
                 {
-                    data: pathCompleted.map((p) => totalCompletedAll > 0 ? (p.value / totalCompletedAll) * 100 : 0),
-                    backgroundColor: pathColors.slice(0, paths.length),
+                    data: [totalCompleted, Math.max(totalTopics - totalCompleted, 0)],
+                    backgroundColor: ['#00fad9', '#1e293b'],
                     borderColor: 'rgba(15, 23, 42, 0.9)',
                     borderWidth: 2,
                     hoverOffset: 8,
@@ -691,36 +704,20 @@
         },
     });
 
-    /* Activity Chart Toggle - Weekly Bar / Monthly Streak */
-    let activityChart = null;
-    const activityCtx = document.getElementById('activity-chart').getContext('2d');
-    const toggleWeekly = document.getElementById('toggle-weekly');
-    const toggleMonthly = document.getElementById('toggle-monthly');
-
-    function renderWeeklyActivity() {
-        if (activityChart) activityChart.destroy();
-        
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        // Calculate completed topics per day (simulated based on completion data)
-        const weeklyData = days.map(() => {
-            let count = 0;
-            paths.forEach((p) => {
-                if (user.completedSubtopics[p]) {
-                    Object.keys(user.completedSubtopics[p]).forEach(() => count++);
-                }
-            });
-            return Math.floor(count / 7) + Math.floor(Math.random() * 5);
-        });
-
-        activityChart = new Chart(activityCtx, {
+    const activityCanvas = document.getElementById('activity-chart');
+    if (activityCanvas) {
+        const activityCtx = activityCanvas.getContext('2d');
+        new Chart(activityCtx, {
             type: 'bar',
             data: {
-                labels: days,
+                labels: pathProgress.map((item) => item.pathName),
                 datasets: [{
-                    label: 'Topics Completed',
-                    data: weeklyData,
-                    backgroundColor: pathColors[0],
-                    borderRadius: 6,
+                    label: 'Progress %',
+                    data: pathProgress.map((item) => item.pct),
+                    backgroundColor: pathProgress.map((_, index) => pathColors[index % pathColors.length]),
+                    borderColor: pathProgress.map((_, index) => pathFillColors[index % pathFillColors.length]),
+                    borderWidth: 1,
+                    borderRadius: 8,
                     borderSkipped: false,
                 }],
             },
@@ -736,93 +733,19 @@
                         ticks: { color: '#94a3b8', font: { size: 11 } },
                     },
                     y: {
+                        beginAtZero: true,
+                        max: 100,
                         grid: { color: 'rgba(255,255,255,0.06)' },
-                        ticks: { color: '#94a3b8', font: { size: 11 }, beginAtZero: true },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { size: 11 },
+                            callback: (value) => `${value}%`,
+                        },
                     },
                 },
             },
         });
     }
-
-    function renderMonthlyStreak() {
-        if (activityChart) activityChart.destroy();
-        
-        // Generate last 30 days streak data
-        const today = new Date();
-        const daysData = [];
-        const labels = [];
-        
-        for (let i = 29; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            labels.push(date.getDate());
-            
-            // Check if user has completed topics (simulate streak)
-            let hasActivity = false;
-            paths.forEach((p) => {
-                if (user.completedSubtopics[p] && Object.keys(user.completedSubtopics[p]).length > 0) {
-                    // Simulate activity based on completion count
-                    const completionCount = Object.keys(user.completedSubtopics[p]).length;
-                    hasActivity = (completionCount + i) % 3 !== 0; // Simulate some days with activity
-                }
-            });
-            daysData.push(hasActivity ? 1 : 0);
-        }
-
-        // Create streak visualization
-        const streakData = daysData.map((val, idx) => ({
-            x: idx,
-            y: val,
-        }));
-
-        activityChart = new Chart(activityCtx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Activity',
-                    data: daysData,
-                    backgroundColor: (ctx) => {
-                        const value = ctx.parsed.y;
-                        return value === 1 ? pathColors[0] : 'rgba(255, 255, 255, 0.1)';
-                    },
-                    borderRadius: 4,
-                    borderSkipped: false,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 },
-                    },
-                    y: {
-                        display: false,
-                    },
-                },
-            },
-        });
-    }
-
-    toggleWeekly.addEventListener('click', () => {
-        toggleWeekly.classList.add('active');
-        toggleMonthly.classList.remove('active');
-        renderWeeklyActivity();
-    });
-
-    toggleMonthly.addEventListener('click', () => {
-        toggleMonthly.classList.add('active');
-        toggleWeekly.classList.remove('active');
-        renderMonthlyStreak();
-    });
-
-    // Initialize with weekly
-    renderWeeklyActivity();
 
     /* Topic Navigation */
     const topicsNav = document.getElementById('topics-navigation');

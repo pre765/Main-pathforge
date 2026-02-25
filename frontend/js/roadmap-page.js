@@ -42,11 +42,6 @@
 
     let activeIndex = 0;
     const completed = new Set();
-
-    // restore completed from user record if available
-    if (user && Array.isArray(user.completedRoadmap)) {
-        user.completedRoadmap.forEach(id => completed.add(Number(id)));
-    }
     // ensure roadmap subtopic progress structure exists
     if (!user.completedSubtopics) user.completedSubtopics = {};
 
@@ -57,6 +52,12 @@
     const continueBtn = document.getElementById('continue-btn');
     const modalClose = document.getElementById('modal-close');
     const modalBackdrop = document.getElementById('modal-backdrop');
+
+    function escapeHtml(text){
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     // helper to resolve topics for a given module index based on current domain/path
     function getModuleTopicsForIndex(index){
@@ -138,9 +139,6 @@
         lessons.forEach((lesson, i)=>{
             const node = document.createElement('div');
             node.className = 'roadmap-node roadmap-step';
-            if(i === activeIndex) node.classList.add('active');
-            else if(completed.has(lesson.id)) node.classList.add('completed');
-            else node.classList.add('locked');
 
             const button = document.createElement('div');
             button.className = 'roadmap-step-button';
@@ -169,12 +167,6 @@
             icon.className = 'roadmap-step-icon';
             icon.textContent = (i + 1).toString();
             button.appendChild(icon);
-
-            if (i === activeIndex) {
-                const aura = document.createElement('div');
-                aura.className = 'roadmap-step-aura';
-                button.appendChild(aura);
-            }
 
             const label = document.createElement('div');
             label.className = 'roadmap-step-label';
@@ -229,6 +221,12 @@
                     checkbox.addEventListener('click', (ev) => {
                         ev.stopPropagation();
                     });
+                    checkbox.addEventListener('pointerdown', (ev) => {
+                        ev.stopPropagation();
+                    });
+                    labelEl.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                    });
 
                     checkbox.addEventListener('change', (ev) => {
                         const done = ev.target.checked;
@@ -260,32 +258,9 @@
             button.appendChild(tooltip);
             button.setAttribute('aria-describedby', tooltipId);
 
-            // direct stage-complete tick control on the 3D node
-            const stageTick = document.createElement('button');
-            stageTick.type = 'button';
-            stageTick.className = 'roadmap-stage-complete-toggle';
-            stageTick.setAttribute('aria-label', `Mark stage ${i+1} as completed`);
-            if (completed.has(lesson.id)) {
-                stageTick.classList.add('is-checked');
-            }
-            if (i > activeIndex) {
-                stageTick.disabled = true;
-            }
-            stageTick.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                if (i > activeIndex) return;
-                // avoid double-complete
-                if (completed.has(lesson.id)) return;
-                markStageCompleted(i, { fromTick: true });
-            });
-            button.appendChild(stageTick);
-
             if (i < lessons.length - 1) {
                 const connector = document.createElement('div');
                 connector.className = 'roadmap-step-connector';
-                if (completed.has(lesson.id)) {
-                    connector.classList.add('unlocked');
-                }
                 node.appendChild(connector);
             }
 
@@ -469,6 +444,9 @@
             li.className = checked ? 'completed' : '';
             li.innerHTML = `<label><input type="checkbox" data-topic="${escapeHtml(topic)}" ${checked? 'checked' : ''}/> <span>${escapeHtml(topic)}</span></label>`;
             const cb = li.querySelector('input[type=checkbox]');
+            cb.addEventListener('pointerdown', (e)=>{
+                e.stopPropagation();
+            });
             cb.addEventListener('change', (e)=>{
                 syncTopicProgress(pathKey, moduleNumber, topic, topicIndex, e.target.checked);
                 li.classList.toggle('completed', e.target.checked);
@@ -529,6 +507,7 @@
     let originIndex = -1;
 
     function onPointerDown(e){
+        if (e.target.closest('input, label, button, a, textarea, select')) return;
         const node = e.currentTarget;
         node.setPointerCapture(e.pointerId);
         dragging = node;
@@ -630,6 +609,10 @@
 (function() {
     if (!getCurrentUser()) {
         window.location.href = 'login.html';
+        return;
+    }
+    // Legacy roadmap renderer: skip when corresponding DOM is not present.
+    if (!document.getElementById('mini-roadmap') || !document.getElementById('roadmap-container')) {
         return;
     }
 

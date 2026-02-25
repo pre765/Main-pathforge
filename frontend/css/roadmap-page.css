@@ -424,23 +424,10 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    background: #1e293b;
-    color: #22d3ee;
-    border-bottom: 8px solid #0f172a;
-    transition: all 0.2s ease;
-}
-
-.roadmap-node.active .roadmap-step-button {
     background: #00fad9;
     color: #000;
-    border-bottom-color: #00c4aa;
-    box-shadow: 0 0 20px rgba(0, 250, 217, 0.4);
-}
-
-.roadmap-node.completed .roadmap-step-button {
-    background: #0f172a;
-    color: #67e8f9;
-    border-bottom-color: #020617;
+    border-bottom: 8px solid #00c4aa;
+    transition: all 0.2s ease;
 }
 
 .roadmap-step-aura {
@@ -581,49 +568,6 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     box-shadow: 0 12px 0 #0b1220, 0 26px 44px rgba(0, 0, 0, 0.42);
 }
 
-.roadmap-stage-complete-toggle {
-    position: absolute;
-    right: -2px;
-    top: -2px;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    border: 2px solid rgba(15, 23, 42, 0.9);
-    background: rgba(15, 23, 42, 0.96);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: #64748b;
-    cursor: pointer;
-    box-shadow: 0 8px 14px rgba(15, 23, 42, 0.85);
-    transition: background 0.16s ease, color 0.16s ease, transform 0.12s ease, box-shadow 0.16s ease;
-    z-index: 4;
-}
-
-.roadmap-stage-complete-toggle::before {
-    content: "✓";
-}
-
-.roadmap-stage-complete-toggle:hover:not(:disabled) {
-    background: #22c55e;
-    color: #022c22;
-    box-shadow: 0 10px 18px rgba(21, 128, 61, 0.75);
-    transform: translateY(-1px);
-}
-
-.roadmap-stage-complete-toggle.is-checked {
-    background: #22c55e;
-    color: #022c22;
-    box-shadow: 0 10px 18px rgba(21, 128, 61, 0.8);
-}
-
-.roadmap-stage-complete-toggle:disabled {
-    opacity: 0.45;
-    cursor: default;
-    box-shadow: none;
-}
-
 .roadmap-node.active .roadmap-step-button {
     background: #58cc02;
     border-color: #89e219;
@@ -639,31 +583,6 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     box-shadow: 0 10px 0 #1899d6, 0 18px 28px rgba(17, 98, 144, 0.32);
 }
 
-.roadmap-node.locked .roadmap-step-button {
-    background: #2f3a4d;
-    border-color: #44556f;
-    color: #a9b4c6;
-    box-shadow: 0 10px 0 #1e2633, 0 18px 24px rgba(0, 0, 0, 0.45);
-}
-
-.roadmap-node.completed .roadmap-step-button::after {
-    content: "✓";
-    position: absolute;
-    right: -6px;
-    bottom: -6px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #58cc02;
-    color: #fff;
-    font-weight: 900;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid #0a0f1e;
-}
-
 .roadmap-step-label {
     margin-top: 14px;
     border-radius: 999px;
@@ -676,10 +595,6 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     font-size: 0.66rem;
     letter-spacing: 0.08em;
     color: #c4d0e2;
-}
-
-.roadmap-node.active .roadmap-step-title {
-    color: #d6ffb3;
 }
 
 .roadmap-step-connector {
