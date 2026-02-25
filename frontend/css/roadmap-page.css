@@ -727,7 +727,7 @@ body{margin:0;font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,'Helvet
     font-size: 0.75rem;
     color: #e2e8f0;
     opacity: 0;
-    pointer-events: none;
+    pointer-events: auto;
     z-index: 20;
     transform-origin: left center;
     transition: opacity 0.16s ease-out, transform 0.16s ease-out;

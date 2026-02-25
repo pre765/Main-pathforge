@@ -174,6 +174,7 @@
                     checkbox.checked = !!isDone;
 
                     checkbox.addEventListener('change', (ev) => {
+                        ev.stopPropagation();
                         const done = ev.target.checked;
                         const users = getUsers();
                         if (!user.completedSubtopics[pathKey]) {
@@ -632,15 +633,16 @@
         if (!user.completedSubtopics[pathName]) user.completedSubtopics[pathName] = {};
         var completedSubs = user.completedSubtopics[pathName];
         var key = pathName + '_' + phaseNum + '_' + subtopicIndex;
-        // Monotonic progress: once a subtopic is completed, never remove it
         if (!completedSubs[key]) {
             completedSubs[key] = true;
-            user.completedSubtopics[pathName] = completedSubs;
-            var users = getUsers();
-            if (users[user.email]) {
-                users[user.email].completedSubtopics = user.completedSubtopics;
-                saveUsers(users);
-            }
+        } else {
+            delete completedSubs[key];
+        }
+        user.completedSubtopics[pathName] = completedSubs;
+        var users = getUsers();
+        if (users[user.email]) {
+            users[user.email].completedSubtopics = user.completedSubtopics;
+            saveUsers(users);
         }
         renderRoadmaps();
     }
@@ -678,27 +680,10 @@
             container.appendChild(section);
         });
 
-        // Add click handlers for checkboxes (monotonic: cannot uncheck once completed)
+        // Add click handlers for checkboxes (toggle on/off)
         container.querySelectorAll('.roadmap-checkbox').forEach(function(cb) {
             cb.addEventListener('change', function() {
-                var path = this.dataset.path;
-                var phase = this.dataset.phase;
-                var idx = parseInt(this.dataset.index);
-                var key = path + '_' + phase + '_' + idx;
-                var alreadyCompleted =
-                    user.completedSubtopics[path] &&
-                    user.completedSubtopics[path][key];
-
-                // If this subtopic was already completed before, keep it checked
-                if (alreadyCompleted && !this.checked) {
-                    this.checked = true;
-                    return;
-                }
-
-                // Only handle transitions from not-completed -> completed
-                if (this.checked && !alreadyCompleted) {
-                    toggleSubtopic(path, phase, idx);
-                }
+                toggleSubtopic(this.dataset.path, this.dataset.phase, parseInt(this.dataset.index));
             });
         });
     }
