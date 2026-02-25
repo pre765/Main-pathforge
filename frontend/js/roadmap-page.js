@@ -40,7 +40,7 @@
         }
     } catch(e){}
 
-    const roadmapIcons = ['🤖', '📊', '🧠', '🛠️', '🚀', '🎯', '💡', '📚'];
+    const roadmapIcons = ['1', '2', '3', '4', '5', '6', '7', '8'];
     let activeIndex = 0;
     const completed = new Set();
 
@@ -71,6 +71,57 @@
             pathKey,
             topics: Array.isArray(fromMap) && fromMap.length ? fromMap : fromPhase
         };
+    }
+
+    function isTopicChecked(pathKey, moduleNumber, topic, topicIndex){
+        const state = getChecklistState();
+        const fromChecklist = !!(state[pathKey] && state[pathKey][moduleNumber] && state[pathKey][moduleNumber][topic]);
+        const subKey = pathKey + '_' + String(moduleNumber) + '_' + String(topicIndex);
+        const fromSubtopics =
+            !!(user.completedSubtopics[pathKey] && user.completedSubtopics[pathKey][subKey]);
+        return fromChecklist || fromSubtopics;
+    }
+
+    function getStageProgress(index){
+        const meta = getModuleTopicsForIndex(index);
+        const moduleNumber = index + 1;
+        const topics = meta.topics || [];
+        if (!topics.length) {
+            const completedStage = completed.has(lessons[index].id);
+            return { done: completedStage ? 1 : 0, total: 1, pct: completedStage ? 100 : 0 };
+        }
+        let done = 0;
+        topics.forEach((topic, topicIndex) => {
+            if (isTopicChecked(meta.pathKey, moduleNumber, topic, topicIndex)) done += 1;
+        });
+        return {
+            done,
+            total: topics.length,
+            pct: Math.round((done / topics.length) * 100)
+        };
+    }
+
+    function syncTopicProgress(pathKey, moduleNumber, topic, topicIndex, done){
+        if (!user.completedSubtopics[pathKey]) {
+            user.completedSubtopics[pathKey] = {};
+        }
+        const subKey = pathKey + '_' + String(moduleNumber) + '_' + String(topicIndex);
+        if (done) {
+            user.completedSubtopics[pathKey][subKey] = true;
+        } else {
+            delete user.completedSubtopics[pathKey][subKey];
+        }
+        const users = getUsers();
+        if (users[user.email]) {
+            users[user.email].completedSubtopics = user.completedSubtopics;
+            saveUsers(users);
+        }
+
+        const state = getChecklistState();
+        if (!state[pathKey]) state[pathKey] = {};
+        if (!state[pathKey][moduleNumber]) state[pathKey][moduleNumber] = {};
+        state[pathKey][moduleNumber][topic] = !!done;
+        saveChecklistState(state);
     }
 
     // init
@@ -136,6 +187,15 @@
             node.appendChild(button);
             node.appendChild(label);
 
+            const stageProgressPill = document.createElement('div');
+            stageProgressPill.className = 'roadmap-stage-progress-pill';
+            const refreshStageProgressPill = () => {
+                const progress = getStageProgress(i);
+                stageProgressPill.textContent = `${progress.done}`;
+            };
+            refreshStageProgressPill();
+            button.appendChild(stageProgressPill);
+
             // hover tooltip showing concepts for this stage (Duolingo-like)
             const tooltipMeta = getModuleTopicsForIndex(i);
             const tooltip = document.createElement('div');
@@ -147,6 +207,16 @@
             ttTitle.className = 'roadmap-stage-tooltip-title';
             ttTitle.textContent = `Stage ${i+1}: ${lesson.title}`;
             tooltip.appendChild(ttTitle);
+
+            const tooltipProgress = document.createElement('div');
+            tooltipProgress.className = 'roadmap-stage-tooltip-progress';
+            const refreshTooltipProgress = () => {
+                const progress = getStageProgress(i);
+                tooltipProgress.textContent = `Progress: ${progress.done} completed`;
+                refreshStageProgressPill();
+            };
+            refreshTooltipProgress();
+            tooltip.appendChild(tooltipProgress);
 
             const topics = tooltipMeta.topics || [];
             if (topics.length) {
@@ -164,13 +234,7 @@
 
                     const moduleNumber = i + 1;
                     const pathKey = tooltipMeta.pathKey;
-                    if (!user.completedSubtopics[pathKey]) {
-                        user.completedSubtopics[pathKey] = {};
-                    }
-                    const subKey = pathKey + '_' + String(moduleNumber) + '_' + String(ti);
-                    const isDone =
-                        user.completedSubtopics[pathKey] &&
-                        user.completedSubtopics[pathKey][subKey];
+                    const isDone = isTopicChecked(pathKey, moduleNumber, t, ti);
                     checkbox.checked = !!isDone;
 
                     checkbox.addEventListener('click', (ev) => {
@@ -179,18 +243,12 @@
 
                     checkbox.addEventListener('change', (ev) => {
                         const done = ev.target.checked;
-                        const users = getUsers();
-                        if (!user.completedSubtopics[pathKey]) {
-                            user.completedSubtopics[pathKey] = {};
-                        }
-                        if (done) {
-                            user.completedSubtopics[pathKey][subKey] = true;
-                        } else {
-                            delete user.completedSubtopics[pathKey][subKey];
-                        }
-                        if (users[user.email]) {
-                            users[user.email].completedSubtopics = user.completedSubtopics;
-                            saveUsers(users);
+                        syncTopicProgress(pathKey, moduleNumber, t, ti, done);
+                        refreshTooltipProgress();
+
+                        const allDone = topics.every((topic, idx) => isTopicChecked(pathKey, moduleNumber, topic, idx));
+                        if (allDone) {
+                            markStageCompleted(i);
                         }
                     });
 
@@ -353,12 +411,10 @@
             const meta = getModuleTopicsForIndex(index);
             const topics = meta.topics || [];
             if (topics.length) {
-                const state = getChecklistState();
                 const moduleNumber = index + 1;
-                if (!state[meta.pathKey]) state[meta.pathKey] = {};
-                if (!state[meta.pathKey][moduleNumber]) state[meta.pathKey][moduleNumber] = {};
-                topics.forEach(t => { state[meta.pathKey][moduleNumber][t] = true; });
-                saveChecklistState(state);
+                topics.forEach((topic, topicIndex) => {
+                    syncTopicProgress(meta.pathKey, moduleNumber, topic, topicIndex, true);
+                });
             }
         } catch(e){}
 
@@ -411,29 +467,26 @@
 
     function renderChecklist(pathKey, moduleNumber, topics){
         const list = document.getElementById('modal-todo-list');
-        const progressFill = document.getElementById('modal-progress-fill');
-        const progressText = document.getElementById('modal-progress-text');
         list.innerHTML = '';
 
         const state = getChecklistState();
         if (!state[pathKey]) state[pathKey] = {};
         if (!state[pathKey][moduleNumber]) state[pathKey][moduleNumber] = {};
 
-        topics.forEach(topic => {
+        topics.forEach((topic, topicIndex) => {
             const li = document.createElement('li');
             const id = `chk_${moduleNumber}_${slug(topic)}`;
-            const checked = !!state[pathKey][moduleNumber][topic];
+            const checked = isTopicChecked(pathKey, moduleNumber, topic, topicIndex);
             li.className = checked ? 'completed' : '';
             li.innerHTML = `<label><input type="checkbox" data-topic="${escapeHtml(topic)}" ${checked? 'checked' : ''}/> <span>${escapeHtml(topic)}</span></label>`;
             const cb = li.querySelector('input[type=checkbox]');
             cb.addEventListener('change', (e)=>{
-                state[pathKey][moduleNumber][topic] = e.target.checked;
-                saveChecklistState(state);
+                syncTopicProgress(pathKey, moduleNumber, topic, topicIndex, e.target.checked);
                 li.classList.toggle('completed', e.target.checked);
                 updateModalProgress(pathKey, moduleNumber, topics);
 
-                // If all topics checked, mark node completed and unlock next
-                const all = topics.every(t => !!state[pathKey][moduleNumber][t]);
+                // If all topics checked, mark stage completed and unlock next
+                const all = topics.every((t, idx) => isTopicChecked(pathKey, moduleNumber, t, idx));
                 if (all) {
                     const stageIndex = moduleNumber - 1;
                     markStageCompleted(stageIndex);
