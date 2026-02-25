@@ -40,7 +40,6 @@
         }
     } catch(e){}
 
-    const roadmapIcons = ['1', '2', '3', '4', '5', '6', '7', '8'];
     let activeIndex = 0;
     const completed = new Set();
 
@@ -168,7 +167,7 @@
 
             const icon = document.createElement('span');
             icon.className = 'roadmap-step-icon';
-            icon.textContent = roadmapIcons[i % roadmapIcons.length];
+            icon.textContent = (i + 1).toString();
             button.appendChild(icon);
 
             if (i === activeIndex) {
@@ -187,15 +186,6 @@
             node.appendChild(button);
             node.appendChild(label);
 
-            const stageProgressPill = document.createElement('div');
-            stageProgressPill.className = 'roadmap-stage-progress-pill';
-            const refreshStageProgressPill = () => {
-                const progress = getStageProgress(i);
-                stageProgressPill.textContent = `${progress.done}`;
-            };
-            refreshStageProgressPill();
-            button.appendChild(stageProgressPill);
-
             // hover tooltip showing concepts for this stage (Duolingo-like)
             const tooltipMeta = getModuleTopicsForIndex(i);
             const tooltip = document.createElement('div');
@@ -213,7 +203,6 @@
             const refreshTooltipProgress = () => {
                 const progress = getStageProgress(i);
                 tooltipProgress.textContent = `Progress: ${progress.done} completed`;
-                refreshStageProgressPill();
             };
             refreshTooltipProgress();
             tooltip.appendChild(tooltipProgress);
