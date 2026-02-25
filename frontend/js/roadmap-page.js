@@ -173,8 +173,11 @@
                         user.completedSubtopics[pathKey][subKey];
                     checkbox.checked = !!isDone;
 
-                    checkbox.addEventListener('change', (ev) => {
+                    checkbox.addEventListener('click', (ev) => {
                         ev.stopPropagation();
+                    });
+
+                    checkbox.addEventListener('change', (ev) => {
                         const done = ev.target.checked;
                         const users = getUsers();
                         if (!user.completedSubtopics[pathKey]) {
