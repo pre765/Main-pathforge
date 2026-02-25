@@ -166,6 +166,26 @@
             button.appendChild(tooltip);
             button.setAttribute('aria-describedby', tooltipId);
 
+            // direct stage-complete tick control on the 3D node
+            const stageTick = document.createElement('button');
+            stageTick.type = 'button';
+            stageTick.className = 'roadmap-stage-complete-toggle';
+            stageTick.setAttribute('aria-label', `Mark stage ${i+1} as completed`);
+            if (completed.has(lesson.id)) {
+                stageTick.classList.add('is-checked');
+            }
+            if (i > activeIndex) {
+                stageTick.disabled = true;
+            }
+            stageTick.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (i > activeIndex) return;
+                // avoid double-complete
+                if (completed.has(lesson.id)) return;
+                markStageCompleted(i, { fromTick: true });
+            });
+            button.appendChild(stageTick);
+
             if (i < lessons.length - 1) {
                 const connector = document.createElement('div');
                 connector.className = 'roadmap-step-connector';
@@ -261,6 +281,53 @@
         container.scrollBy({top: offset, behavior: 'smooth'});
     }
 
+    // mark a stage as completed and advance progress
+    function markStageCompleted(index, opts){
+        const options = opts || {};
+        const lesson = lessons[index];
+        if (!lesson) return;
+        const lessonId = lesson.id;
+        if (completed.has(lessonId)) return;
+
+        completed.add(lessonId);
+
+        // persist completed status to user record
+        const full = getFullUser();
+        if (full) {
+            const users = getUsers();
+            if (users[full.email]) {
+                users[full.email].completedRoadmap = Array.from(completed);
+                saveUsers(users);
+            }
+        }
+
+        // also mark all checklist topics for this module as done
+        try {
+            const meta = getModuleTopicsForIndex(index);
+            const topics = meta.topics || [];
+            if (topics.length) {
+                const state = getChecklistState();
+                const moduleNumber = index + 1;
+                if (!state[meta.pathKey]) state[meta.pathKey] = {};
+                if (!state[meta.pathKey][moduleNumber]) state[meta.pathKey][moduleNumber] = {};
+                topics.forEach(t => { state[meta.pathKey][moduleNumber][t] = true; });
+                saveChecklistState(state);
+            }
+        } catch(e){}
+
+        // animate connector glow between this and next
+        animateConnectorGlow(index);
+
+        // advance active stage if we are on this one
+        if (index === activeIndex && activeIndex < lessons.length - 1) {
+            activeIndex += 1;
+            scrollToNode(activeIndex);
+        }
+
+        // re-render nodes to reflect completion state
+        setTimeout(renderRoadmap, 380);
+    }
+
     function openModal(index){
         const lesson = lessons[index];
         modalTitle.textContent = `Module ${index+1}: ${lesson.title}`;
@@ -281,28 +348,8 @@
 
     continueBtn.addEventListener('click', ()=>{
         const curIdx = activeIndex;
-        const curLesson = lessons[curIdx];
-        if (curLesson) completed.add(curLesson.id);
-
-        // animate connector glow between cur and next
-        animateConnectorGlow(curIdx);
-
-        if(activeIndex < lessons.length - 1){
-            activeIndex += 1;
-        }
-
+        markStageCompleted(curIdx);
         closeModal();
-        // persist completed status to user record
-        const full = getFullUser();
-        if (full) {
-            const users = getUsers();
-            if (users[full.email]) {
-                users[full.email].completedRoadmap = Array.from(completed);
-                saveUsers(users);
-            }
-        }
-
-        setTimeout(renderRoadmap, 380);
     });
 
     /* Checklist / persistence */
@@ -341,26 +388,8 @@
                 // If all topics checked, mark node completed and unlock next
                 const all = topics.every(t => !!state[pathKey][moduleNumber][t]);
                 if (all) {
-                    // mark completed set
-                    const lessonId = moduleNumber - 1;
-                    completed.add(lessonId);
-                    // persist to user
-                    const full = getFullUser();
-                    if (full) {
-                        const users = getUsers();
-                        if (users[full.email]) {
-                            users[full.email].completedRoadmap = Array.from(completed);
-                            saveUsers(users);
-                        }
-                    }
-                    // unlock/advance activeIndex
-                    if (activeIndex < lessons.length - 1 && (lessonId === activeIndex)) {
-                        activeIndex += 1;
-                        // smooth scroll to next
-                        scrollToNode(activeIndex);
-                    }
-                    // re-render nodes to update visuals
-                    renderRoadmap();
+                    const stageIndex = moduleNumber - 1;
+                    markStageCompleted(stageIndex);
                 }
             });
 
